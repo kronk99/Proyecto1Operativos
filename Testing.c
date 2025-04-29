@@ -1,6 +1,7 @@
 #include "CEthreads.h"
 #include "CEmutex.h"
 #include "Car.h"
+#include "ReadyQueue.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,39 +10,50 @@
 
 #define NUM_CARROS 5
 
+
 void *car_function(void *arg) {
     Car *car = (Car *)arg;
-    printf("Carro #%d de tipo %d quiere cruzar\n", car->id, car->type);
-    sleep(car->burstTime);  // Simula el cruce según su tipo
+    printf("Carro #%d (tipo %d, prioridad %d) quiere cruzar\n", car->id, car->type, car->priority);
+    sleep(car->burstTime);  // Simula el cruce
     printf("Carro #%d ha cruzado\n", car->id);
-    free(car);  // Importante liberar memoria
+    free(car);  // Libera memoria
     return NULL;
 }
 
 int main() {
-    CEthread_t threads[NUM_CARROS];
+    srand(time(NULL));
 
-    srand(time(NULL));  // Para que los tipos sean aleatorios
+    ReadyQueue queue;
+    init_queue(&queue);
 
     for (int i = 0; i < NUM_CARROS; i++) {
         Car *car = malloc(sizeof(Car));
         car->id = i + 1;
         car->type = rand() % 3;  // 0: normal, 1: deportivo, 2: emergencia
         car->speed = car->type + 1;
-        car->burstTime = 4 - car->speed;  // más rápido → menos tiempo
-        car->priority = 2 - car->type;    // emergencia = prioridad 0
+        car->burstTime = 4 - car->speed;
+        car->priority = 2 - car->type;
         car->position = 0;
         car->direction = rand() % 2;
         clock_gettime(CLOCK_REALTIME, &car->arrival_time);
 
-        int tid = CEthread_create(car_function, car);
-        threads[i].tid = tid;
+        enqueue_priority(&queue, car);
     }
 
-    for (int i = 0; i < NUM_CARROS; i++) {
+    while (!is_empty(&queue)) {
+        Car *car = dequeue(&queue);
+        CEthread_t thread;
+    
+        printf("Lanzando carro #%d\n", car->id);
+        int tid = CEthread_create(car_function, car);
+        thread.tid = tid;
+    
+        printf("Esperando a que carro #%d termine\n", car->id);
         void *retval;
-        CEthread_join(threads[i], &retval);
+        CEthread_join(thread, &retval);
+        printf("Carro #%d terminó correctamente\n", car->id);
     }
+    
 
     return 0;
 }

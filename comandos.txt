@@ -1,12 +1,7 @@
-gcc -I CEthreads/include \
-    CEthreads/src/CEmutex.c \
-    CEthreads/src/CEthread_wrapper.c \
-    CEthreads/src/CEthreads_q.c \
-    CEthreads/src/CEthreads.c \
-    CEthreads/src/futex.c \
-    Testing.c \
-    -o CEthreads/output/test
+EN Proyecto1Operativos:
 
+
+gcc -I CEthreads/include CEthreads/src/CEmutex.c CEthreads/src/CEthread_wrapper.c CEthreads/src/CEthreads_q.c CEthreads/src/CEthreads.c CEthreads/src/futex.c CEthreads/src/ReadyQueue.c Testing.c -o CEthreads/output/test
 
 
 ./CEthreads/output/test

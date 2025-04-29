@@ -25,3 +25,4 @@ CEthread_private_t *CEthread_q_search(unsigned long tid) {
 }
 //Para CEthread_join pq permite encontrar el hilo objetivo al que se quiere esperar. tambien para modificar el estado de un hilo en especifico
 
+//  Administra hilos CEThread activos (tipo kernel interno de CEThreads)
