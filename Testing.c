@@ -2,6 +2,7 @@
 #include "CEmutex.h"
 #include "Car.h"
 #include "ReadyQueue.h"
+#include "Calendarizador/Scheduler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -10,53 +11,60 @@
 
 #define NUM_CARROS 5
 
-
 void *car_function(void *arg) {
     Car *car = (Car *)arg;
     printf("Carro #%d (tipo %d, prioridad %d) quiere cruzar\n", car->id, car->type, car->priority);
-    sleep(car->burstTime);  // Simula el cruce
+    sleep(car->burstTime);
     printf("Carro #%d ha cruzado\n", car->id);
-    free(car);  // Libera memoria
+    free(car);
     return NULL;
 }
 
 int main() {
     srand(time(NULL));
 
-    ReadyQueue queue;
-    init_queue(&queue);
+    //preguntar por el algoritmo
+    int seleccion;
+    printf("Seleccione el algoritmo de calendarización:\n");
+    printf("0 = FCFS\n1 = SJF\n2 = Prioridad\n> ");
+    scanf("%d", &seleccion);
+    seleccionar_algoritmo(seleccion);
 
+    //crear y encolar los carros
     for (int i = 0; i < NUM_CARROS; i++) {
         Car *car = malloc(sizeof(Car));
         car->id = i + 1;
-        car->type = rand() % 3;  // 0: normal, 1: deportivo, 2: emergencia
+        car->type = rand() % 3;
         car->speed = car->type + 1;
         car->burstTime = 4 - car->speed;
-        car->priority = 2 - car->type;
+        car->priority = rand() % 5;
         car->position = 0;
         car->direction = rand() % 2;
         clock_gettime(CLOCK_REALTIME, &car->arrival_time);
 
-        enqueue_priority(&queue, car);
+        encolar_con_algoritmo(car);
     }
 
-    while (!is_empty(&queue)) {
-        Car *car = dequeue(&queue);
+    // hilos en orden algoritmo
+    while (!is_empty(&global_queue)) {
+        Car *car = siguiente_carro();
         CEthread_t thread;
-    
+
         printf("Lanzando carro #%d\n", car->id);
         int tid = CEthread_create(car_function, car);
         thread.tid = tid;
-    
+
         printf("Esperando a que carro #%d termine\n", car->id);
         void *retval;
         CEthread_join(thread, &retval);
         printf("Carro #%d terminó correctamente\n", car->id);
     }
-    
 
+    puts("Todos los carros han cruzado.");
     return 0;
 }
+
+
 
 /*
 void *my_start_routine(void *arg) {
