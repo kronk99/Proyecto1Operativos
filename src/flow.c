@@ -158,44 +158,54 @@ void* car_thread_fifo(void* arg) {
     return NULL;
 }
 
+
 void fifo(struct CarList* left, struct CarList* right) {
-    int total = left->count + right->count;
+    while (left->count > 0 || right->count > 0) {
+        int left_has = left->count > 0;
+        int right_has = right->count > 0;
 
-    // Crear lista combinada de carros
-    struct Car** allCars = malloc(sizeof(struct Car*) * total);
-    int index = 0;
+        struct Car* selected_car = NULL;
+        int from_left = 0;
 
-    // Copiar los carros de la izquierda
-    for (int i = 0; i < left->count; i++) {
-        allCars[index++] = &left->cars[i];
-    }
+        if (left_has && right_has) {
+            struct Car* left_car = &left->cars[0];
+            struct Car* right_car = &right->cars[0];
 
-    // Copiar los carros de la derecha
-    for (int i = 0; i < right->count; i++) {
-        allCars[index++] = &right->cars[i];
-    }
+            if (left_car->id < right_car->id) {
+                selected_car = left_car;
+                from_left = 1;
+            } else {
+                selected_car = right_car;
+                from_left = 0;
+            }
+        } else if (left_has) {
+            selected_car = &left->cars[0];
+            from_left = 1;
+        } else if (right_has) {
+            selected_car = &right->cars[0];
+            from_left = 0;
+        }
 
-    // Ordenar carros por su ID (FIFO)
-    for (int i = 0; i < total - 1; i++) {
-        for (int j = i + 1; j < total; j++) {
-            if (allCars[i]->id > allCars[j]->id) {
-                struct Car* temp = allCars[i];
-                allCars[i] = allCars[j];
-                allCars[j] = temp;
+        if (selected_car) {
+            pthread_t tid;
+            // Creamos una copia local del carro porque lo vamos a eliminar de la lista
+            struct Car car_copy = *selected_car;
+
+            pthread_create(&tid, NULL, car_thread_fifo, (void*)&car_copy);
+            pthread_join(tid, NULL);  // Esperamos a que cruce
+
+            // Eliminar de la lista original
+            if (from_left) {
+                for (int i = 0; i < left->count - 1; i++) {
+                    left->cars[i] = left->cars[i + 1];
+                }
+                left->count--;
+            } else {
+                for (int i = 0; i < right->count - 1; i++) {
+                    right->cars[i] = right->cars[i + 1];
+                }
+                right->count--;
             }
         }
     }
-
-    // Crear hilos para cada carro en orden FIFO
-    for (int i = 0; i < total; i++) {
-        pthread_create(&allCars[i]->thread, NULL, car_thread_fifo, allCars[i]);
-    }
-
-    // Esperar que todos los hilos terminen
-    for (int i = 0; i < total; i++) {
-        pthread_join(allCars[i]->thread, NULL);
-    }
-
-    // Liberar memoria de la lista combinada
-    free(allCars);
 }
