@@ -1,5 +1,6 @@
 #ifndef _FUTEX_INLINE_H
 #define _FUTEX_INLINE_H
+#include "futex.h"
 
 static inline int __atomic_dec(int *counter) {
     return __sync_sub_and_fetch(counter, 1);

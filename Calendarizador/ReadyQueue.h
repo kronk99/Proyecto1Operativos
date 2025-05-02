@@ -10,6 +10,7 @@ typedef struct Node {
 
 typedef struct {
     Node *head;
+    Node *tail; //anadido luis , facilita las cosas en RR
 } ReadyQueue;
 
 void init_queue(ReadyQueue *q);

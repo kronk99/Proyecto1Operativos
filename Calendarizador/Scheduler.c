@@ -2,11 +2,11 @@
 #include "algoritmos/prioridad.h"
 
 Algoritmo algoritmo_actual = ALG_FCFS;
-ReadyQueue global_queue;
+ReadyQueue global_queue; //cola de listo 
 
 void seleccionar_algoritmo(int seleccion) {
-    algoritmo_actual = (Algoritmo)seleccion;
-    init_queue(&global_queue);
+    algoritmo_actual = (Algoritmo)seleccion; //cambiar luego, esto es el algoritmo seleccionado
+    init_queue(&global_queue); //inicializa el global queue
 }
 
 void encolar_con_algoritmo(Car *car) {

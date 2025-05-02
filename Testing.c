@@ -1,7 +1,7 @@
 #include "CEthreads.h"
 #include "CEmutex.h"
 #include "Car.h"
-#include "ReadyQueue.h"
+#include "Calendarizador/ReadyQueue.h"
 #include "Calendarizador/Scheduler.h"
 #include <stdio.h>
 #include <stdlib.h>
