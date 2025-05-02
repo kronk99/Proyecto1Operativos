@@ -1,0 +1,12 @@
+Method: 1
+StreetLength: 500
+SignChangeTime: 10
+ParameterW: 3
+Scheduler: 2
+
+Car0: id=0, position=0, side=0, speed=2, priority=1, burstTime=5, type=1
+Car1: id=1, position=0, side=1, speed=3, priority=2, burstTime=6, type=0
+Car2: id=2, position=0, side=0, speed=1, priority=1, burstTime=4, type=2
+Car3: id=3, position=0, side=0, speed=2, priority=1, burstTime=5, type=1
+Car4: id=4, position=0, side=1, speed=3, priority=2, burstTime=6, type=0
+Car5: id=5, position=0, side=1, speed=1, priority=1, burstTime=4, type=2

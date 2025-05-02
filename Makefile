@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g -pthread -Icar
 
 # Archivos fuente
-SRCS = Road.c src/cars.c src/flow.c
+SRCS = Road.c src/cars.c src/flow.c src/read.c
 
 # Archivos objeto (automáticamente generados a partir de SRCS)
 OBJS = $(SRCS:.c=.o)
