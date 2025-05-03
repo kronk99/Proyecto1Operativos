@@ -5,7 +5,10 @@ CC = gcc
 CFLAGS = -Wall -Wextra -g -pthread -Icar
 
 # Archivos fuente
-SRCS = Road.c src/cars.c src/flow.c src/read.c
+SRCS = Road.c src/cars.c src/flow.c src/read.c \
+			src/CEmutex.c src/CEthread_wrapper.c \
+			src/CEthreads.c src/CEthreads_q.c \
+			src/futex.c 
 
 # Archivos objeto (automáticamente generados a partir de SRCS)
 OBJS = $(SRCS:.c=.o)
@@ -28,7 +31,10 @@ $(EXEC): $(OBJS)
 clean:
 	rm -f $(OBJS) $(EXEC)
 
-# Regla para compilar y ejecutar el programa
+# Regla para compilar y ejecutar el programa normalmente
 run: $(EXEC)
 	./$(EXEC)
 
+# Regla para ejecutar el programa en GDB
+gdb: $(EXEC)
+	gdb ./$(EXEC)

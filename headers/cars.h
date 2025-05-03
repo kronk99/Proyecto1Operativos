@@ -1,7 +1,7 @@
 #ifndef CAR_H
 #define CAR_H
 
-#include <pthread.h>
+#include "CEthreads.h"
 
 struct Car {
     int id;
@@ -11,7 +11,7 @@ struct Car {
     int priority;
     int burstTime;
     int type;
-    pthread_t thread;
+    CEthread_t thread;
 };
 
 struct CarList {

@@ -1,7 +1,7 @@
 Method: 1
 StreetLength: 500
 SignChangeTime: 10
-ParameterW: 3
+ParameterW: 2
 Scheduler: 2
 
 Car0: id=0, position=0, side=0, speed=2, priority=1, burstTime=5, type=1

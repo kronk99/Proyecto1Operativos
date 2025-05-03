@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../headers/cars.h"
+#include "../headers/CEthreads.h"
 
 void initCarList(struct CarList* list, int capacity) {
     list->cars = (struct Car*)malloc(sizeof(struct Car) * capacity);
@@ -37,6 +38,6 @@ struct Car createCar(int id, int side, int speed, int priority, int burstTime, i
     newCar.priority = priority;
     newCar.burstTime = burstTime;
     newCar.type = type;
-    newCar.thread = 0; // el hilo se inicializa luego
+    newCar.thread;
     return newCar;
 }

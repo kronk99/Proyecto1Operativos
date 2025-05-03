@@ -38,7 +38,7 @@ int main() {
     }
 
     // Usar el algoritmo FIFO para hacer pasar los carros
-    fifo(&left, &right);
+    equity(&left, &right, data.parameterW);
 
     // Liberar memoria3
     freeCarList(&left);
