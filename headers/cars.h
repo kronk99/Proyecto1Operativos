@@ -2,6 +2,7 @@
 #define CAR_H
 
 #include "CEthreads.h"
+#include "CEmutex.h"
 
 struct Car {
     int id;
@@ -12,6 +13,7 @@ struct Car {
     int burstTime;
     int type;
     CEthread_t thread;
+    CEmutex_t *mutex;
 };
 
 struct CarList {

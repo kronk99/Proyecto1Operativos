@@ -2,6 +2,12 @@
 #include "headers/cars.h"
 #include "headers/flow.h"
 #include "headers/read.h"
+#include "headers/CEmutex.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <linux/futex.h>
 
 int main() {
     struct CarList left, right;

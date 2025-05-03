@@ -1,12 +1,14 @@
 #include "../headers/CEthreads.h"
 #include "../headers/CEthread_private.h"
+#include "../headers/CEmutex.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <linux/futex.h>
 #include "../headers/CEthreads_q.h"
-#include "../headers/CEMutex.h"
+#include <sys/types.h>
+
 
 // variable global EXTERNA que apunta a la cabeza de la lista enlazada de hilos
 extern CEthread_private_t *CEthread_q_head;
@@ -74,7 +76,7 @@ void CEthread_end() {
 }
 
 //  para esperar a que otro hilo termine
-int CEthread_join(CEthread_t target_thread, void **status, CEthread_t *mutex) {
+int CEthread_join(CEthread_t target_thread, void **status) {
     CEthread_private_t *target, *self_ptr;
     self_ptr = __CEthread_selfptr(); // obtiene el hilo actual
 
@@ -108,7 +110,7 @@ int CEthread_join(CEthread_t target_thread, void **status, CEthread_t *mutex) {
 
         // al despertar, se recoge el valor de retorno
         *status = target->returnValue;
-+
+
         // eliminA el hilo de la lista
         if (target == CEthread_q_head) {
             CEthread_q_head = target->next;

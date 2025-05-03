@@ -11,9 +11,7 @@
 //typedef struct {
   //  atomic_int value; // 0 = libre, 1 = ocupado
 //} 
-
-//CEmutex_t;
-
+//
 // inicializa el mutex a 0 (libre)
 void CEmutex_init(CEmutex_t *mutex) {
     atomic_init(&mutex->value, 0);
@@ -41,6 +39,8 @@ void CEmutex_lock(CEmutex_t *mutex) {
             syscall(SYS_futex, &mutex->value, FUTEX_WAIT, 1, NULL, NULL, 0);
         }
     }
+    printf("se hizo un lock al mutex \n");
+    //printf(mutex->value);
 }
 
 // desbloquea el mutex (libera y despierta un hilo)

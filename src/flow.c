@@ -6,7 +6,8 @@
 #include "../headers/CEmutex.h"
 
 
-CEmutex_t road_mutex; 
+CEmutex_t *road_mutex; //crea una estructura mutex , deberia de ser un puntero con un malloc
+//CEmutex_init(road_mutex);
 
 int current_direction = -1;  // -1: libre, 0: izquierda, 1: derecha
 int cars_on_road = 0;
@@ -15,24 +16,24 @@ int cars_on_road = 0;
 void* equity_car_thread(void* arg) {
     struct Car* c = (struct Car*)arg;
 
-    CEmutex_lock(&road_mutex);
-
+    fprintf(stderr, "Esperando al mutex\n");
+    CEmutex_lock(road_mutex);
     current_direction = c->side;
-    cars_on_road++;
-
-    printf("Carro %d cruzando desde %s...\n", c->id, c->side == 0 ? "IZQUIERDA" : "DERECHA");
-    sleep(c->burstTime);
-    printf("Carro %d ha cruzado.\n", c->id);
-
-    cars_on_road--;
-    CEmutex_unlock(&road_mutex);
-
+    cars_on_road++; //mete al carro en la calle
+    
+    fprintf(stderr, "Carro %d cruzando desde %s...\n", c->id, c->side == 0 ? "IZQUIERDA" : "DERECHA");
+    sleep(10); //esto hace que lleguen al mismo tiempo
+    //sin este sleep si llegan como deberian.
+    fprintf(stderr, "Carro %d ha cruzado.\n", c->id);
+    cars_on_road--; //quita el carro de la calle
+    CEmutex_unlock(road_mutex);
     free(c);
     return NULL;
 }
 
 void equity(struct CarList* left, struct CarList* right, int w) {
-    CEmutex_init(&road_mutex);
+    road_mutex = malloc(sizeof(CEmutex_t)); //creo el mutex
+    CEmutex_init(road_mutex); //lo inicializo
     int left_index = 0;
     int right_index = 0;
 
@@ -42,6 +43,8 @@ void equity(struct CarList* left, struct CarList* right, int w) {
         for (i = 0; i < w && left_index < left->count; i++) {
             struct Car* c = malloc(sizeof(struct Car));
             *c = left->cars[left_index++];
+            //anadido del mutex
+            c->mutex = road_mutex;
             CEthread_t thread;
             int tid = CEthread_create(equity_car_thread, c);
             thread.tid = tid;
@@ -53,6 +56,7 @@ void equity(struct CarList* left, struct CarList* right, int w) {
         for (i = 0; i < w && right_index < right->count; i++) {
             struct  Car* c = malloc(sizeof(struct Car));
             *c = right->cars[right_index++];
+            c->mutex = road_mutex; //le meto el mutex
             CEthread_t thread;
             int tid = CEthread_create(equity_car_thread, c);
             thread.tid = tid;
@@ -66,6 +70,9 @@ void equity(struct CarList* left, struct CarList* right, int w) {
     while (cars_on_road > 0) {
         sleep(1);
     }
+    //fflush(stdout);
+    fprintf(stderr, "Todos los carros han cruzado.\n");
+    CEmutex_destroy(road_mutex);
 }
 /*
 // ======================= LETRERO =========================
