@@ -1,11 +1,12 @@
 #ifndef CETHREAD_PRIVATE_H
 #define CETHREAD_PRIVATE_H
+#include <sys/types.h> 
 
 typedef struct CEthread_private {
-    int tid;
+    pid_t tid;
     void *(*start_routine)(void *);
     void *arg;
-    int state; // 0: READY, 1: RUNNING, 2: DEFUNCT, 3: BLOCKED
+    int state;
     struct CEthread_private *blockedForJoin;
     struct CEthread_private *next;
     void *returnValue;

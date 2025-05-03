@@ -50,6 +50,7 @@ int CEthread_create(void *(*start_routine)(void*), void *arg) {
         void *retval = start_routine(arg);       // ejecuta la funcion con los argumentos
         self_ptr->returnValue = retval;          // guarda el valor de retorno
         CEthread_end();                          // cuandeo termina llama la funcion de finalizacion
+        return 0;                                // para evitar el warning, no ejecuta. 
     } else {
         // si el valor es mayor que cero, estamos en el hilo padre
         // se reserva memoria para representar al nuevo hilo

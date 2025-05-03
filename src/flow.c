@@ -22,9 +22,11 @@ void* equity_car_thread(void* arg) {
     cars_on_road++; //mete al carro en la calle
     
     fprintf(stderr, "Carro %d cruzando desde %s...\n", c->id, c->side == 0 ? "IZQUIERDA" : "DERECHA");
-    sleep(10); //esto hace que lleguen al mismo tiempo
-    //sin este sleep si llegan como deberian.
+    //sleep(10); 
+    sleep(c->burstTime);
+    //este sleep es el que crea el buffer en el print. 
     fprintf(stderr, "Carro %d ha cruzado.\n", c->id);
+    fflush(stdout);
     cars_on_road--; //quita el carro de la calle
     CEmutex_unlock(road_mutex);
     free(c);

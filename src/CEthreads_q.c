@@ -13,7 +13,7 @@ CEthread_private_t *CEthread_q_search(unsigned long tid) {
     // recorre la lista mientras no sea el final
     while (current != NULL) {
         // si encuentra el hilo con el tid buscado, lo retorna
-        if (current->tid == tid) {
+        if (current->tid == (int)tid) {
             return current;
         }
         // avanza al siguiente nodo de la lista

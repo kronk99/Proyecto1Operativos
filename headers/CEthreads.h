@@ -11,7 +11,7 @@
 #include "CEmutex.h"
 
 typedef struct {
-    int tid;
+    pid_t tid;
 } CEthread_t;
 
 CEthread_private_t *__CEthread_selfptr();

@@ -38,6 +38,6 @@ struct Car createCar(int id, int side, int speed, int priority, int burstTime, i
     newCar.priority = priority;
     newCar.burstTime = burstTime;
     newCar.type = type;
-    newCar.thread;
+    newCar.thread.tid = -1;
     return newCar;
 }
