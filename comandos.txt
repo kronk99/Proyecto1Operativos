@@ -1,7 +1,11 @@
+CORREGIDO
+
 EN Proyecto1Operativos:
 
 
-gcc -I CEthreads/include -I Calendarizador     CEthreads/src/*.c     Calendarizador/ReadyQueue.c     Calendarizador/Scheduler.c     Calendarizador/algoritmos/prioridad.c     Testing.c -o output/test
+gcc -I./CEthreads/include -I./Calendarizador -I./Calendarizador/algoritmos CEthreads/src/CEmutex.c CEthreads/src/CEthreads.c CEthreads/src/CEthread_wrapper.c CEthreads/src/futex.c CEthreads/src/CEthreads_q.c Calendarizador/ReadyQueue.c Calendarizador/Scheduler.c Calendarizador/algoritmos/prioridad.c Testing.c -o output/test_exec -lpthread
+
+ ./output/test_exec
 
 
- ./output/test
+
