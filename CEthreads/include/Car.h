@@ -2,6 +2,8 @@
 #define CAR_H
 
 #include <time.h>
+#include "CEmutex.h"
+
 
 typedef struct {
     int id;            // identificador unico del carro
@@ -13,5 +15,6 @@ typedef struct {
     int deadline;      // si aplica, para tiempo real
     int direction;     // 0: izquierda a derecha, 1: derecha a izquierda
     struct timespec arrival_time; // momento de llegada (para FCFS)
+    CEmutex_t *mutex; 
 } Car;
 #endif
