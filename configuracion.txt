@@ -1,0 +1,8 @@
+Largo de la calle: 222
+Cantidad de carros: 2
+Tipo de calendarizador: 2222
+Tipo de flujo: 22
+Tiempo del letrero: 223455
+Cantidad inicial carros deportivos: 666
+Cantidad inicial carros normales: 66
+Cantidad inicial carros emergencia: 55
