@@ -7,5 +7,16 @@ gcc -I./CEthreads/include -I./Calendarizador -I./Calendarizador/algoritmos CEthr
 
  ./output/test_exec
 
+Comando para interfaz de inicio
 
+gcc Inicio.c -o Inicio -lX11
+
+./Inicio
+
+
+Comandos para interfaz de carretera
+
+gcc Interface.c -o interfaz -lX11 -lXpm
+
+./interfaz
 
