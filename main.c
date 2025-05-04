@@ -27,14 +27,59 @@ int main(int argc, char* argv[]) {
         scanf("%d", &cantidadCarros);
     }
 
-    printf("Ingrese el tipo de calendarizador (RR, Prioridad, SJF, FCFS, TiempoReal): ");
-    scanf("%s", tipoCalendarizador);
+    // ======= SELECCIONAR TIPO DE CALENDARIZADOR =======
+    int opcionCal;
+    do {
+        printf("Seleccione el tipo de calendarizador:\n");
+        printf("  1. RR\n");
+        printf("  2. Prioridad\n");
+        printf("  3. SJF\n");
+        printf("  4. FCFS\n");
+        printf("  5. TiempoReal\n");
+        printf("Opcion: ");
+        scanf("%d", &opcionCal);
 
-    printf("Ingrese el tipo de flujo (Equidad, Letrero, FIFO): ");
-    scanf("%s", tipoFlujo);
+        if (opcionCal < 1 || opcionCal > 5) {
+            printf("ERROR: Opcion invalida.\n");
+        }
+    } while (opcionCal < 1 || opcionCal > 5);
 
-    printf("Ingrese el tiempo del letrero (segundos): ");
+    switch (opcionCal) {
+        case 1: strcpy(tipoCalendarizador, "RR"); break;
+        case 2: strcpy(tipoCalendarizador, "Prioridad"); break;
+        case 3: strcpy(tipoCalendarizador, "SJF"); break;
+        case 4: strcpy(tipoCalendarizador, "FCFS"); break;
+        case 5: strcpy(tipoCalendarizador, "TiempoReal"); break;
+    }
+
+    // ======= SELECCIONAR TIPO DE FLUJO =======
+    int opcionFlujo;
+    do {
+        printf("Seleccione el tipo de flujo:\n");
+        printf("  1. Equidad\n");
+        printf("  2. Letrero\n");
+        printf("  3. FIFO\n");
+        printf("Opcion: ");
+        scanf("%d", &opcionFlujo);
+
+        if (opcionFlujo < 1 || opcionFlujo > 3) {
+            printf("ERROR: Opcion invalida.\n");
+        }
+    } while (opcionFlujo < 1 || opcionFlujo > 3);
+
+    switch (opcionFlujo) {
+        case 1: strcpy(tipoFlujo, "Equidad"); break;
+        case 2: strcpy(tipoFlujo, "Letrero"); break;
+        case 3: strcpy(tipoFlujo, "FIFO"); break;
+    }
+
+    // ======= VALIDAR TIEMPO DEL LETRERO =======
+    printf("Ingrese el tiempo del letrero (segundos, max 90): ");
     scanf("%d", &tiempoLetrero);
+    while (tiempoLetrero < 0 || tiempoLetrero > 90) {
+        printf("ERROR: Tiempo invalido. Ingrese entre 0 y 90 segundos: ");
+        scanf("%d", &tiempoLetrero);
+    }
 
     // ======= VALIDACION DE SUMA DE CARROS =======
     do {
@@ -52,7 +97,6 @@ int main(int argc, char* argv[]) {
         } else if (cantidadDeportivos + cantidadNormales + cantidadEmergencia != cantidadCarros) {
             printf("ERROR: La suma de deportivos, normales y emergencia debe ser igual a la cantidad total de carros (%d).\n", cantidadCarros);
         }
-
     } while (cantidadDeportivos < 0 || cantidadNormales < 0 || cantidadEmergencia < 0 ||
              cantidadDeportivos + cantidadNormales + cantidadEmergencia != cantidadCarros);
 
