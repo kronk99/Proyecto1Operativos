@@ -1,0 +1,8 @@
+Largo de la calle: 500
+Cantidad de carros: 12
+Tipo de calendarizador: RR
+Tipo de flujo: FIFO
+Tiempo del letrero: 90
+Cantidad inicial carros deportivos: 4
+Cantidad inicial carros normales: 3
+Cantidad inicial carros emergencia: 5
