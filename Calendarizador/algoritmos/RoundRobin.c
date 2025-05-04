@@ -12,7 +12,6 @@ void initRR(roundRobin *circular,Car *car){
     circular->current = new_node; //va a apuntar hacia la cabeza siempre
 };
 //insertar un carro a la lista de calendarizacion de RR (circular)
-//llamo a esto primero
 void scheduleCar(roundRobin *circular,Car *car){
     Node *new_node = malloc(sizeof(Node)); //crea un nuevo nodo
     new_node->Car = car; //le inserta el carro
@@ -61,7 +60,6 @@ void decreaseQuantum(roundRobin *circular){
 void nextcurrent(roundRobin *circular){
     circular->current = circular->current->next;
 }
-//este es el metodo que llamo desde scheduler 
 void schedulereadyCar(ReadyQueue *readyqueue,roundRobin *circular){//esto deberia de ser con los cethreads
     Node *new_node = malloc(sizeof(Node)); //hago un nuevo nodo de tipo carro
     new_node->Car = circular->current->Car; //el ccurrent se debe cambiar cada que llamo 

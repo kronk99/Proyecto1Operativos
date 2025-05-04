@@ -1,5 +1,7 @@
 #include "interfaz.h"
 #include <stdio.h>
+#include "CEthreads/include/Car.h"
+
 
 int iniciarInterfaz(SDL_Window** window, SDL_Renderer** renderer) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -26,7 +28,7 @@ int iniciarInterfaz(SDL_Window** window, SDL_Renderer** renderer) {
 
     return 1;
 }
-
+//ESTO PINTA EL CARRO EN UNAS COORDNEADAS ESPECIFICADAS
 SDL_Texture* cargarCarro(SDL_Renderer* renderer, const char* path) {
     SDL_Surface* surface = IMG_Load(path);
     if (!surface) {
@@ -40,15 +42,14 @@ SDL_Texture* cargarCarro(SDL_Renderer* renderer, const char* path) {
     return texture;
 }
 
-void dibujarEscenario(SDL_Renderer* renderer, SDL_Texture* carSport, SDL_Texture* carNormal, SDL_Texture* carEmergency, int largoCalle, int cantidadDeportivos, int cantidadNormales, int cantidadEmergencia) {
+void dibujarEscenario(SDL_Renderer* renderer, SDL_Texture* carSport, SDL_Texture* carNormal, SDL_Texture* carEmergency, Car** carros, int cantidadCarros, int largoCalle) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
     int bloqueVerdeWidth = 60;
     int bloqueRojoWidth = 60;
-    int calleWidth = 600;  // ancho fijo visual de la calle
+    int calleWidth = 600;
 
-    // Dibujar bloques
     SDL_Rect bloqueVerdeIzq = {0, 0, bloqueVerdeWidth, WINDOW_HEIGHT};
     SDL_Rect bloqueRojoIzq = {bloqueVerdeWidth, 0, bloqueRojoWidth, WINDOW_HEIGHT};
     SDL_Rect calle = {bloqueVerdeWidth + bloqueRojoWidth, 0, calleWidth, WINDOW_HEIGHT};
@@ -66,72 +67,49 @@ void dibujarEscenario(SDL_Renderer* renderer, SDL_Texture* carSport, SDL_Texture
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderFillRect(renderer, &calle);
 
-    // Línea amarilla horizontal
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
     int cantidadLineas = largoCalle / 10;
     if (cantidadLineas < 1) cantidadLineas = 1;
     int espacioEntreLineas = calle.w / cantidadLineas;
     int anchoLinea = espacioEntreLineas / 2;
-
     for (int i = 0; i < cantidadLineas; i++) {
         int xLinea = calle.x + i * espacioEntreLineas;
         SDL_Rect linea = {xLinea, WINDOW_HEIGHT / 2 - 5, anchoLinea, 10};
         SDL_RenderFillRect(renderer, &linea);
     }
 
-    // === DIBUJAR CARROS ===
-    int espaciadoVertical = 50;
-    int offsetY = 50;
-    int posY;
+    // === DIBUJAR CADA CARRO SEGÚN SU TIPO ===
+    int espaciadoVertical = 50; // espacio vertical entre carros
+    int offsetY = 50;           // separación inicial desde arriba
 
-    // DIBUJAR CARROS IZQUIERDA
-    int cuenta = 0;
-    for (int i = 0; i < cantidadDeportivos; i++) {
-        posY = offsetY + cuenta * espaciadoVertical;
-        SDL_Rect car = {10, posY, 40, 30};
-        SDL_RenderCopyEx(renderer, carSport, NULL, &car, 0, NULL, SDL_FLIP_HORIZONTAL);
-        cuenta++;
-    }
-    for (int i = 0; i < cantidadNormales; i++) {
-        posY = offsetY + cuenta * espaciadoVertical;
-        SDL_Rect car = {10, posY, 40, 30};
-        SDL_RenderCopyEx(renderer, carNormal, NULL, &car, 0, NULL, SDL_FLIP_HORIZONTAL);
-        cuenta++;
-    }
-    for (int i = 0; i < cantidadEmergencia; i++) {
-        posY = offsetY + cuenta * espaciadoVertical;
-        SDL_Rect car = {10, posY, 40, 30};
-        SDL_RenderCopyEx(renderer, carEmergency, NULL, &car, 0, NULL, SDL_FLIP_HORIZONTAL);
-        cuenta++;
-    }
+    int contadorIzquierda = 0;  // cuántos carros van por el lado izquierdo
+    int contadorDerecha = 0;    // cuántos carros van por el lado derecho
 
-    // DIBUJAR CARROS DERECHA
-    cuenta = 0;
-    for (int i = 0; i < cantidadDeportivos; i++) {
-        posY = offsetY + cuenta * espaciadoVertical;
-        SDL_Rect car = {bloqueVerdeDer.x + 10, posY, 40, 30};
-        SDL_RenderCopy(renderer, carSport, NULL, &car);
-        cuenta++;
-    }
-    for (int i = 0; i < cantidadNormales; i++) {
-        posY = offsetY + cuenta * espaciadoVertical;
-        SDL_Rect car = {bloqueVerdeDer.x + 10, posY, 40, 30};
-        SDL_RenderCopy(renderer, carNormal, NULL, &car);
-        cuenta++;
-    }
-    for (int i = 0; i < cantidadEmergencia; i++) {
-        posY = offsetY + cuenta * espaciadoVertical;
-        SDL_Rect car = {bloqueVerdeDer.x + 10, posY, 40, 30};
-        SDL_RenderCopy(renderer, carEmergency, NULL, &car);
-        cuenta++;
+    // Recorrer todos los carros
+    for (int i = 0; i < cantidadCarros; i++) {
+        SDL_Texture* textura = NULL; // textura del carro según su tipo
+
+        // Seleccionar la textura correcta según el tipo de carro
+        if (carros[i]->type == 1) textura = carSport;
+        else if (carros[i]->type == 0) textura = carNormal;
+        else if (carros[i]->type == 2) textura = carEmergency;
+
+        SDL_Rect carRect;
+        if (carros[i]->direction == 0) { // si el carro viene por la izquierda
+            int posY = offsetY + contadorIzquierda * espaciadoVertical;
+            carRect = (SDL_Rect){10, posY, 40, 30}; // posición del carro a la izquierda
+            SDL_RenderCopyEx(renderer, textura, NULL, &carRect, 0, NULL, SDL_FLIP_HORIZONTAL); // voltear para que mire hacia la derecha
+            contadorIzquierda++; // aumentar contador de izquierda
+        } else { // si el carro viene por la derecha
+            int posY = offsetY + contadorDerecha * espaciadoVertical;
+            carRect = (SDL_Rect){bloqueVerdeDer.x + 10, posY, 40, 30}; // posición del carro a la derecha
+            SDL_RenderCopy(renderer, textura, NULL, &carRect); // no se voltsea
+            contadorDerecha++; // aumentar contador de derecha
+        }
     }
 
     SDL_RenderPresent(renderer);
 }
-
-
-
-
 
 void cerrarInterfaz(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* carSport, SDL_Texture* carNormal, SDL_Texture* carEmergency) {
     if (carSport) SDL_DestroyTexture(carSport);
