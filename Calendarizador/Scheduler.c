@@ -1,5 +1,6 @@
 #include "Scheduler.h"
 #include "algoritmos/prioridad.h"
+#include "algoritmos/SJF.h"
 
 Algoritmo algoritmo_actual = ALG_FCFS;
 ReadyQueue global_queue;
@@ -15,7 +16,7 @@ void encolar_con_algoritmo(Car *car) {
             enqueue_priority(&global_queue, car);
             break;
         case ALG_SJF:
-            // futura implementación
+            enqueue_SJF(&global_queue, car);
             break;
         case ALG_FCFS:
         default:
