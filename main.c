@@ -36,14 +36,25 @@ int main(int argc, char* argv[]) {
     printf("Ingrese el tiempo del letrero (segundos): ");
     scanf("%d", &tiempoLetrero);
 
-    printf("Ingrese la cantidad inicial de carros deportivos: ");
-    scanf("%d", &cantidadDeportivos);
+    // ======= VALIDACION DE SUMA DE CARROS =======
+    do {
+        printf("Ingrese la cantidad inicial de carros deportivos: ");
+        scanf("%d", &cantidadDeportivos);
 
-    printf("Ingrese la cantidad inicial de carros normales: ");
-    scanf("%d", &cantidadNormales);
+        printf("Ingrese la cantidad inicial de carros normales: ");
+        scanf("%d", &cantidadNormales);
 
-    printf("Ingrese la cantidad inicial de carros de emergencia: ");
-    scanf("%d", &cantidadEmergencia);
+        printf("Ingrese la cantidad inicial de carros de emergencia: ");
+        scanf("%d", &cantidadEmergencia);
+
+        if (cantidadDeportivos < 0 || cantidadNormales < 0 || cantidadEmergencia < 0) {
+            printf("ERROR: Ninguna cantidad puede ser negativa.\n");
+        } else if (cantidadDeportivos + cantidadNormales + cantidadEmergencia != cantidadCarros) {
+            printf("ERROR: La suma de deportivos, normales y emergencia debe ser igual a la cantidad total de carros (%d).\n", cantidadCarros);
+        }
+
+    } while (cantidadDeportivos < 0 || cantidadNormales < 0 || cantidadEmergencia < 0 ||
+             cantidadDeportivos + cantidadNormales + cantidadEmergencia != cantidadCarros);
 
     // ======= GUARDAR DATOS EN ARCHIVO =======
     FILE* archivo = fopen("configuracion.txt", "w");
@@ -72,9 +83,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SDL_Texture* carTexture = cargarCarro(renderer, "images/sport.png");
-    if (!carTexture) {
-        cerrarInterfaz(window, renderer, NULL);
+    SDL_Texture* carSport = cargarCarro(renderer, "images/sport.png");
+    SDL_Texture* carNormal = cargarCarro(renderer, "images/normal.png");
+    SDL_Texture* carEmergency = cargarCarro(renderer, "images/emergency.png");
+
+    if (!carSport || !carNormal || !carEmergency) {
+        cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);
         return 1;
     }
 
@@ -88,11 +102,11 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        dibujarEscenario(renderer, carTexture);
+        dibujarEscenario(renderer, carSport, carNormal, carEmergency, largoCalle, cantidadDeportivos, cantidadNormales, cantidadEmergencia);
         SDL_Delay(16);
     }
 
-    cerrarInterfaz(window, renderer, carTexture);
+    cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);
 
     return 0;
 }

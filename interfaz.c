@@ -40,64 +40,92 @@ SDL_Texture* cargarCarro(SDL_Renderer* renderer, const char* path) {
     return texture;
 }
 
-void dibujarEscenario(SDL_Renderer* renderer, SDL_Texture* carTexture) {
-    // Fondo negro
+void dibujarEscenario(SDL_Renderer* renderer, SDL_Texture* carSport, SDL_Texture* carNormal, SDL_Texture* carEmergency, int largoCalle, int cantidadDeportivos, int cantidadNormales, int cantidadEmergencia) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
     int bloqueVerdeWidth = 60;
     int bloqueRojoWidth = 60;
-    int calleWidth = 550;
+    int calleWidth = 600;  // ancho fijo visual de la calle
 
-    // Posiciones
+    // Dibujar bloques
     SDL_Rect bloqueVerdeIzq = {0, 0, bloqueVerdeWidth, WINDOW_HEIGHT};
     SDL_Rect bloqueRojoIzq = {bloqueVerdeWidth, 0, bloqueRojoWidth, WINDOW_HEIGHT};
     SDL_Rect calle = {bloqueVerdeWidth + bloqueRojoWidth, 0, calleWidth, WINDOW_HEIGHT};
     SDL_Rect bloqueRojoDer = {bloqueVerdeWidth + bloqueRojoWidth + calleWidth, 0, bloqueRojoWidth, WINDOW_HEIGHT};
     SDL_Rect bloqueVerdeDer = {bloqueVerdeWidth + bloqueRojoWidth + calleWidth + bloqueRojoWidth, 0, bloqueVerdeWidth, WINDOW_HEIGHT};
 
-    // Bloque verde izquierdo
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
     SDL_RenderFillRect(renderer, &bloqueVerdeIzq);
+    SDL_RenderFillRect(renderer, &bloqueVerdeDer);
 
-    // Bloque rojo izquierdo
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &bloqueRojoIzq);
+    SDL_RenderFillRect(renderer, &bloqueRojoDer);
 
-    // Calle blanca
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderFillRect(renderer, &calle);
 
-    // Bloque rojo derecho
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &bloqueRojoDer);
-
-    // Bloque verde derecho
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    SDL_RenderFillRect(renderer, &bloqueVerdeDer);
-
-    // Línea amarilla horizontal en medio de la calle
+    // Línea amarilla horizontal
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-    for (int x = calle.x; x < calle.x + calle.w; x += 40) {
-        SDL_Rect linea = {x, WINDOW_HEIGHT / 2 - 5, 20, 10};
+    int cantidadLineas = largoCalle / 10;
+    if (cantidadLineas < 1) cantidadLineas = 1;
+    int espacioEntreLineas = calle.w / cantidadLineas;
+    int anchoLinea = espacioEntreLineas / 2;
+
+    for (int i = 0; i < cantidadLineas; i++) {
+        int xLinea = calle.x + i * espacioEntreLineas;
+        SDL_Rect linea = {xLinea, WINDOW_HEIGHT / 2 - 5, anchoLinea, 10};
         SDL_RenderFillRect(renderer, &linea);
     }
 
-    // Carritos sobre bloque verde izquierdo
-    SDL_Rect carIzq1 = {10, 50, 40, 30};
-    SDL_Rect carIzq2 = {10, 150, 40, 30};
+    // === DIBUJAR CARROS ===
+    int espaciadoVertical = 50;
+    int offsetY = 50;
+    int posY;
 
-    // Carritos sobre bloque verde derecho
-    SDL_Rect carDer1 = {bloqueVerdeDer.x + 10, 50, 40, 30};
-    SDL_Rect carDer2 = {bloqueVerdeDer.x + 10, 150, 40, 30};
+    // DIBUJAR CARROS IZQUIERDA
+    int cuenta = 0;
+    for (int i = 0; i < cantidadDeportivos; i++) {
+        posY = offsetY + cuenta * espaciadoVertical;
+        SDL_Rect car = {10, posY, 40, 30};
+        SDL_RenderCopyEx(renderer, carSport, NULL, &car, 0, NULL, SDL_FLIP_HORIZONTAL);
+        cuenta++;
+    }
+    for (int i = 0; i < cantidadNormales; i++) {
+        posY = offsetY + cuenta * espaciadoVertical;
+        SDL_Rect car = {10, posY, 40, 30};
+        SDL_RenderCopyEx(renderer, carNormal, NULL, &car, 0, NULL, SDL_FLIP_HORIZONTAL);
+        cuenta++;
+    }
+    for (int i = 0; i < cantidadEmergencia; i++) {
+        posY = offsetY + cuenta * espaciadoVertical;
+        SDL_Rect car = {10, posY, 40, 30};
+        SDL_RenderCopyEx(renderer, carEmergency, NULL, &car, 0, NULL, SDL_FLIP_HORIZONTAL);
+        cuenta++;
+    }
 
-    // Dibujar carritos
-    SDL_RenderCopy(renderer, carTexture, NULL, &carIzq1);
-    SDL_RenderCopy(renderer, carTexture, NULL, &carIzq2);
-    SDL_RenderCopy(renderer, carTexture, NULL, &carDer1);
-    SDL_RenderCopy(renderer, carTexture, NULL, &carDer2);
+    // DIBUJAR CARROS DERECHA
+    cuenta = 0;
+    for (int i = 0; i < cantidadDeportivos; i++) {
+        posY = offsetY + cuenta * espaciadoVertical;
+        SDL_Rect car = {bloqueVerdeDer.x + 10, posY, 40, 30};
+        SDL_RenderCopy(renderer, carSport, NULL, &car);
+        cuenta++;
+    }
+    for (int i = 0; i < cantidadNormales; i++) {
+        posY = offsetY + cuenta * espaciadoVertical;
+        SDL_Rect car = {bloqueVerdeDer.x + 10, posY, 40, 30};
+        SDL_RenderCopy(renderer, carNormal, NULL, &car);
+        cuenta++;
+    }
+    for (int i = 0; i < cantidadEmergencia; i++) {
+        posY = offsetY + cuenta * espaciadoVertical;
+        SDL_Rect car = {bloqueVerdeDer.x + 10, posY, 40, 30};
+        SDL_RenderCopy(renderer, carEmergency, NULL, &car);
+        cuenta++;
+    }
 
-    // Mostrar en pantalla
     SDL_RenderPresent(renderer);
 }
 
@@ -105,10 +133,11 @@ void dibujarEscenario(SDL_Renderer* renderer, SDL_Texture* carTexture) {
 
 
 
-void cerrarInterfaz(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* carTexture) {
-    SDL_DestroyTexture(carTexture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    IMG_Quit();
+void cerrarInterfaz(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* carSport, SDL_Texture* carNormal, SDL_Texture* carEmergency) {
+    if (carSport) SDL_DestroyTexture(carSport);
+    if (carNormal) SDL_DestroyTexture(carNormal);
+    if (carEmergency) SDL_DestroyTexture(carEmergency);
+    if (renderer) SDL_DestroyRenderer(renderer);
+    if (window) SDL_DestroyWindow(window);
     SDL_Quit();
 }
