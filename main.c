@@ -120,33 +120,17 @@ int main(int argc, char* argv[]) {
     fclose(archivo);
     printf("Datos guardados en configuracion.txt.\n");
 
-     // === CREAR LISTA DE CARROS ===
-     Car* listaCarros[2*cantidadCarros];
-     int id = 1;
-     int i = 0;
- 
-     for (int j = 0; j < 2*cantidadDeportivos; j++, i++) {
-         Car* car = malloc(sizeof(Car));
-         car->id = id++;
-         car->type = 1;
-         car->direction = rand() % 2;
-         listaCarros[i] = car;
-     }
-     for (int j = 0; j < 2*cantidadNormales; j++, i++) {
-         Car* car = malloc(sizeof(Car));
-         car->id = id++;
-         car->type = 0;
-         car->direction = rand() % 2;
-         listaCarros[i] = car;
-     }
-     for (int j = 0; j < 2*cantidadEmergencia; j++, i++) {
-         Car* car = malloc(sizeof(Car));
-         car->id = id++;
-         car->type = 2;
-         car->direction = rand() % 2;
-         listaCarros[i] = car;
-     }
+    //=====================ES ACA LO QUE DEBO DE MODIFICAR ------------------------------------------------------
+    //************************************************************************************** */
+    //Consultar a Luis si algo no se entiende aca que hace y como esta conectado
+    /*==================================================================================*/
+    //LLAMADO A INICIALIZAR LAS COLAS, TODO SE LLAMA DE LAS FUNCIONES DE TESTING.C
+    initQueue(opcionCal);  //inicializa las colas, ambas colas fungiran para la cola de
+    //listo y tambien para la cola de pintado.
 
+
+
+     
     // ======= INICIAR INTERFAZ GRAFICA =======
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
@@ -159,6 +143,7 @@ int main(int argc, char* argv[]) {
         cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);
         return 1;
     }
+    //=======CAR CREATION=============
 
     int quit = 0;
     SDL_Event e;

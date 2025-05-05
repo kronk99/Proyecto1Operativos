@@ -3,23 +3,28 @@
 //burst time es cuanto le falta para llegar al otro lado de la carretera
 #include "RoundRobin.h"
 //inicializacion del calendarizador round robin.
-void initRR(roundRobin *circular,Car *car){
-    Node *new_node = malloc(sizeof(Node)); //crea un nuevo nodo
-    new_node->Car = car; //le inserta el carro
-    new_node->next = NULL; //coloca el puntero de next en nulo
-    circular->head = new_node ;//asigna la cabeza al nuevo nodo
-    circular->tail = new_node;
-    circular->current = new_node; //va a apuntar hacia la cabeza siempre
+void initRR(roundRobin *circular){ //no se usa
+    circular = malloc(sizeof(roundRobin));
 };
 //insertar un carro a la lista de calendarizacion de RR (circular)
 void scheduleCar(roundRobin *circular,Car *car){
-    Node *new_node = malloc(sizeof(Node)); //crea un nuevo nodo
-    new_node->Car = car; //le inserta el carro
-    new_node->next = circular->tail; //coloca el puntero del nex del nuevo nodo a la cola
-    circular->tail = new_node; //convierte la nueva cola en el circularTail
-    //ya que lo insertara de ultimo
-    circular->head->next = new_node ;//el next de la cabeza apunta al nuevo tail.
-
+    if(circular->head!=NULL){
+        Node *new_node = malloc(sizeof(Node)); //crea un nuevo nodo
+        new_node->car = car; //le inserta el carro
+        new_node->next = circular->tail; //coloca el puntero del nex del nuevo nodo a la cola
+        circular->tail = new_node; //convierte la nueva cola en el circularTail
+        //ya que lo insertara de ultimo
+        circular->head->next = new_node ;//el next de la cabeza apunta al nuevo tail.
+    }
+    else{ //si la cabeza es nula
+        Node *new_node = malloc(sizeof(Node)); //crea un nuevo nodo
+        new_node->car = car; //le inserta el carro
+        new_node->next = NULL; //coloca el puntero de next en nulo
+        circular->head = new_node ;//asigna la cabeza al nuevo nodo
+        circular->tail = new_node;
+        circular->current = new_node; //va a apuntar hacia la cabeza siempre
+    }
+    
 
 }; //inserta el carro a la la lista circular
 void checkQuantum(roundRobin *circular, int quantum){
@@ -50,29 +55,23 @@ void checkQuantum(roundRobin *circular, int quantum){
 }; //hace el context switch 
 
 Node* getcurrent(roundRobin *circular){
+    //aca debo de verificar el burst time , si es 0,
     return circular->current;
 }; //standby 
 void decreaseQuantum(roundRobin *circular){
-    if(circular->Qos!=0){
-        circular->Qos-=1;
+    
+    circular->Qos-=1;
+    circular->current->car->burstTime-=1;
+    //checkeo el burst times
+    if (circular->current->car->burstTime ==0){//FALTA LA ELIMINACION
+        Node *oldcurrent =circular->current;
+        //deleteNode(circular); //elimina el nodo current
+        //resetea el quantum
     }
 };
-void nextcurrent(roundRobin *circular){
+void nextcurrent(roundRobin *circular){ //elimina de la lista circular
     circular->current = circular->current->next;
 }
-void schedulereadyCar(ReadyQueue *readyqueue,roundRobin *circular){//esto deberia de ser con los cethreads
-    Node *new_node = malloc(sizeof(Node)); //hago un nuevo nodo de tipo carro
-    new_node->Car = circular->current->Car; //el ccurrent se debe cambiar cada que llamo 
-    //a este metodo
-    new_node->next = NULL;
+//IDEA EN LA QUE QUEDE, BASICAMENTE USAR EL CIRCULAR LIST COMO LA READY QUEUE
+//SACAR DE LA LISTA A MEDIDA QUE SE COMPLETEN LOS Carros.
 
-    if (!readyqueue->head) {
-        readyqueue->head = new_node;
-        readyqueue->tail = new_node;
-        
-    }
-    else{
-        new_node->next = readyqueue->tail;
-        readyqueue->tail=new_node;
-    }
-}; 

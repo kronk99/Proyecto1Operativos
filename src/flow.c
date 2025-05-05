@@ -17,7 +17,7 @@ void* equity_car_thread(void* arg) {
     struct Car* c = (struct Car*)arg;
 
     fprintf(stderr, "Esperando al mutex\n");
-    CEmutex_lock(road_mutex);
+    CEmutex_lock(road_mutex);//espera hasta que le haga unlock en el dequeue.
     //while ACA EN TEORIA DEBE IR EL MOVIMIENTO DE LA INTERFAZ.
 
     current_direction = c->side;

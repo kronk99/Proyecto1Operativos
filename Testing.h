@@ -4,5 +4,5 @@
 #include "CEthreads/include/Car.h"
 void ejecutarSimulacion(Car** carros, int cantidadCarros, const char* tipoCalendarizador);
 void *car_function(void *arg) ;
-
+void initQueue(int tipoCalendarizador);
 #endif

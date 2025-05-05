@@ -3,6 +3,7 @@
 
 #include <time.h>
 #include "CEmutex.h"
+#include <SDL2/SDL_render.h>
 
 
 typedef struct {
@@ -15,6 +16,9 @@ typedef struct {
     int deadline;      // si aplica, para tiempo real
     int direction;     // 0: izquierda a derecha, 1: derecha a izquierda
     struct timespec arrival_time; // momento de llegada (para FCFS)
-    CEmutex_t *mutex; 
+    SDL_Texture* carTexture; //puntero a la textura
+    CEmutex_t *mutex; //Mutex propio del carro para impedir que ejecute
+    //recuerde que la funcion del hilo lee este mutex, no el mutex de la pista, 
+    //cada hilo tiene su propio mutex!!!!!!
 } Car;
 #endif

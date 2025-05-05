@@ -1,21 +1,23 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
-
 #include "Car.h"
 #include "ReadyQueue.h"
+#include "RoundRobin.h"
 
 typedef enum {
     ALG_FCFS,
     ALG_SJF,
-    ALG_PRIORIDAD
+    ALG_PRIORIDAD,
     ALG_RR
 } Algoritmo;
 
 extern Algoritmo algoritmo_actual;
-extern ReadyQueue global_queue; //esto es como una instancia global
+extern ReadyQueue global_queue;
+extern ReadyQueue global_queueLeft;
+extern roundRobin* rrScheduler;
 
 void seleccionar_algoritmo(int seleccion);
-void encolar_con_algoritmo(Car *car);
+void encolar_con_algoritmo(Car *car,int queue);
 Car* siguiente_carro(void);
 
 #endif

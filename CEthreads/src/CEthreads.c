@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <linux/futex.h>
 #include "../include/CEthreads_q.h"
+#include <sys/types.h>
 
 // variable global EXTERNA que apunta a la cabeza de la lista enlazada de hilos
 extern CEthread_private_t *CEthread_q_head;

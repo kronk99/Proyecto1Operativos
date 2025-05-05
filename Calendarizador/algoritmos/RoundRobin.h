@@ -1,14 +1,20 @@
 #ifndef RoundRobin
 #define RoundRobin
-#include "../ReadyQueue.h"
+#include "Car.h"
+#include "ReadyQueue.h"
+typedef struct roundRobin{
+    int Qos;
+    Node *head;
+    Node *tail;
+    Node*current;
+}roundRobin;
+//esto es el nodo
 
-void initRR(roundRobin *circular,Car *car);
-//insertar un carro a la lista de calendarizacion de RR (circular)
-void scheduleCar(roundRobin *circular,Car *car);
-void checkQuantum(roundRobin *circular, int quantum);
-Node* getcurrent(roundRobin *circular);
-void decreaseQuantum(roundRobin *circular);
-void nextcurrent(roundRobin *circular);
-void schedulereadyCar(ReadyQueue *readyqueue,roundRobin *circular);
 
+void initRR(roundRobin *circular); //iniliciazdor del RR
+void scheduleCar(roundRobin *circular,Car *car); //inserta el carro a la la lista circular
+void checkQuantum(roundRobin *roundRobin,int quantum); //hace el context switch 
+Car* getcurrentCar(); //
+void decreaseQuantum(roundRobin *roundRobin);
+void schedulereadyCar(ReadyQueue *readyqueue,roundRobin *roundRobin); 
 #endif
