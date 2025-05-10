@@ -52,7 +52,6 @@ int main(int argc, char* argv[]) {
         case 4: strcpy(tipoCalendarizador, "FCFS"); break;
         case 5: strcpy(tipoCalendarizador, "TiempoReal"); break;
     }
-
     // ======= SELECCIONAR TIPO DE FLUJO =======
     int opcionFlujo;
     do {
@@ -126,8 +125,7 @@ int main(int argc, char* argv[]) {
     /*==================================================================================*/
     //LLAMADO A INICIALIZAR LAS COLAS, TODO SE LLAMA DE LAS FUNCIONES DE TESTING.C
     initQueue(opcionCal);  //inicializa las colas, ambas colas fungiran para la cola de
-    //listo y tambien para la cola de pintado.
-
+    //listo y tambien para la cola de pintado en interfaz
 
 
      
@@ -144,9 +142,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     //=======CAR CREATION=============
-
+    //para dudas ver metodo createCars en testing.
+    createCars(cantidadDeportivos,cantidadEmergencia,cantidadNormales,carSport,carEmergency,carNormal);
+    //crea los carros y LOS CALENDARIZA, ATENTOA ESO ,debe de ser diferente cuando sea por
+    //botones
     int quit = 0;
     SDL_Event e;
+
 
     while (!quit) {
         while (SDL_PollEvent(&e)) {
@@ -161,3 +163,9 @@ int main(int argc, char* argv[]) {
     cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);
     return 0;
 }
+//letrero
+//dequeue car
+// si el carro ya llego al otro lado
+//dequeue
+------------- #bloqueo
+--

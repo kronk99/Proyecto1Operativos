@@ -18,7 +18,7 @@
 void *car_function(void *arg) {
     Car *car = (Car *)arg;
     CEmutex_t *mutex = car->mutex;
-
+    //se mueve 
     printf("Carro #%d está esperando el mutex para cruzar...\n", car->id);
     CEmutex_lock(mutex); //espera hasta que le haga un unlock en otro lado
     //es decir la funcion que va a descalendarizar los carros
@@ -28,6 +28,7 @@ void *car_function(void *arg) {
     printf("Carro #%d ha cruzado (mutex liberado)\n", car->id);
 
     CEmutex_unlock(mutex);
+    //aca hace falta un metodo de pintado global ()paintall
 
     free(car);
     return NULL;
@@ -101,8 +102,7 @@ void createCars(int deportivos, int ambulancias, int normales, SDL_Texture* carS
         //end generar hilo, esta dormido ya que inicio con el mutex tomado
         //se necesita un algoritmo descolador que le haga pop a la cola, y haga
         //car ->unlock mutex.
-        encolar_con_algoritmo(car,1); //lo encola
-
+        encolar_con_algoritmo(car,1); //lo encola , el numero es el tipo de calendarizador
     }
     for (int j = 0; j < deportivos; j++) {
         //al carro hay que anadirle la textura sdl
@@ -200,7 +200,7 @@ void createCars(int deportivos, int ambulancias, int normales, SDL_Texture* carS
         encolar_con_algoritmo(car,1); //lo encola
 
     }
-    for (int j = 0; j < ambulancias j++) {
+    for (int j = 0; j < ambulancias ;j++) {
         //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
         car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
@@ -229,15 +229,11 @@ void createCars(int deportivos, int ambulancias, int normales, SDL_Texture* carS
     //aca tambien debo de crear los hilos, con su mutex muerto.
 }
 void initQueue(int tipoCalendarizador){
-    seleccionar_algoritmo(tipoCalendarizador); //inicializa las colas.
+    seleccionar_algoritmo(tipoCalendarizador); //inicializa las colas, metodo de calendarizador
+     
     //el 3 es el calendarizado de mariana
 }
-
-
-
-
-
-
+//dequeue
 
 /*
 //#define NUM_CARROS 
