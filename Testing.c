@@ -233,7 +233,108 @@ void initQueue(int tipoCalendarizador){
      
     //el 3 es el calendarizado de mariana
 }
-//dequeue
+
+//No sé si el W se pasa automaticamente cuando se llama esta funcion o si se guarda de manera global en alguna parte
+//Pasaría lo mismo con time, no se si de pasa o se agarra de otro lado
+//Se necesita modificar el struct del carro para que tenga posx y posy iniciales indicando si es del lado derecho o izquierdo
+void dequeue(int tipo_flujo, int W, double time) {
+    //Ya para este punto se tuvo que haber pasado por el calendarizador, entonces, agarro los carros en ese orden
+    //Necesito agarrar el carro y entonces aplicarle CEmutex_unlock para indicar que ese carro(hilo) tiene permiso para ejecutarse
+    int currentSide = 0; // Comenzamos con los carros de la izquierda
+    switch (tipo_flujo) {
+        case 1:
+            /*
+            consiste en establecer un parámetro W (indicado por el usuario) que indica cuántos carros deben de 
+            pasar de cada lado. Es decir, se inicia permitiendo el paso de W carros de izquierda a derecha, y luego W carros de
+            derecha a izquierda. En caso de que en alguno de los lados no haya carros, se debe garantizar el flujo 
+            de vehículos desde el lado donde sí los haya.
+            */
+
+            //Logica
+            // Agarro el primer hilo de la lista calendarizada. 
+            // Llamo a CEmutex_unlock para establecer que esta listo para ejecutarse el hilo
+            // Lo pinto en las coordenadas establecidas ya sean del lado derecho o del lado izquierdo
+            // Lo pinto y lo voy moviendo, la verificacion es con las coordenadas de limite, estas hay que agregarlas de alguna manera tal vez
+            // estableciendolas desde este archivo testing.
+            // Una vez que termina debo elimnar la imagen, destruir el mutex, el hilo y liberar el espacio
+
+            //Este while es para estar verificando que la lista no este vacia
+            while (!is_empty(&global_queue)) {
+                //Esta varible es el limite que se compara con el W
+                count = 0;
+
+                // Este for me sirve para pasar solo w carros de cierto lado
+                for (int i = 0; i < global_queue.count && count < W; i++) {
+                    struct Car* car = &global_queue.cars[i];
+
+                    siguiente = true;
+
+                    //este while es para que se este realizando el movimiento del mismo carro
+                    //siguiente es la variable que me ayuda a estar haciendo el while sobre el mismo carro
+                    while(siguiente){
+                        if (car->side == currentSide) {
+
+                            // Se desbloquea el mutex para que el hilo pueda empezar a moverse
+                            CEmutex_unlock(car->mutex);
+
+                                //Verifico si el movimiento que se esta realizando es de izquierda a derecha
+                                //para saber cuales limites son lo que se debe usar
+                                if(car->side == 0){ //Movimiento a la derecha
+                                    if(car->posx >= limite_derecha){
+                                        //Tengo que destruir todo e incluso quitar la imagen
+                                    }
+                                    //No se ha llegado al limite entonces sigo moviendo a la derecha
+                                    else{
+                                        //Llamar a la funcion que se encarga del movimiento
+                                    }
+                                    
+                                }
+                                else{
+                                    if(car->posx <= limite_izquierda){
+                                        //Tengo que destruir todo
+                                    }
+                                    else{
+                                        //Llamar a la funcion que se encarga del movimiento
+                                    }
+
+                                }
+                        }
+                        //Significa que me tope en la lista un carro que va en el otro lado entonces hago false el while para que 
+                        //se pase al siguiente en la lista con el 
+                        siguiente = false;
+
+                    }
+                    count++;
+                }
+
+                // Cambiar de lado
+                currentSide = (currentSide == 0) ? 1 : 0;
+                count = 0;
+            }
+
+            printf("Aplicando flujo de tipo Equidad...\n");
+            // Aquí va la implementación de Equidad
+            break;
+
+        case 2:
+            // FIFO: lógica para dejar pasar los carros en el orden en que llegaron
+            printf("Aplicando flujo de tipo FIFO...\n");
+            // Aquí va la implementación de FIFO
+            break;
+
+        case 3:
+            // Letrero: Puede presentar problemas debido a que, segun el tiempo establecido para que pasen los carros, puede
+            // que alguno quede en medio camino, entonces hay que guardar esas coordenadas, volver a guardar el carro en la cola 
+            // y para la proxima entonces el carro comeinza desde las coordenadas que quedó anteriormente.
+            printf("Flujo de tipo Letrero aún no implementado.\n");
+            break;
+
+        default:
+            printf("Tipo de flujo no válido: %d\n", tipo_flujo);
+            break;
+    }
+}
+
 
 /*
 //#define NUM_CARROS 
