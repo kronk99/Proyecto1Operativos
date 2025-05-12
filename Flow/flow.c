@@ -16,6 +16,7 @@ void equity(int w, ReadyQueue* quequeRight, ReadyQueue* quequeLeft) {
         for (int i = 0; i < w && !is_empty(quequeLeft); i++) {
             Car* car = siguiente_carro(quequeLeft);
             CEmutex_unlock(car->mutex);
+            printf("\n", car->mutex->value);
             sleep(car->burstTime);
         }
         sleep(1);
@@ -24,6 +25,7 @@ void equity(int w, ReadyQueue* quequeRight, ReadyQueue* quequeLeft) {
         for (int i = 0; i < w && !is_empty(quequeRight); i++) {
             Car* car = siguiente_carro(quequeRight);
             CEmutex_unlock(car->mutex);
+            printf("\n", car->mutex->value);
             sleep(car->burstTime);
         }
     }

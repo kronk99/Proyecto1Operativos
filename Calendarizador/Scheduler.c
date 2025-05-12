@@ -26,7 +26,7 @@ void encolar_con_algoritmo(Car *car, ReadyQueue *queue) {
             enqueue_SJF(queue, car);
             break;
         case ALG_FCFS:
-            enqueue(queue, car); // Asumo que existe `enqueue` estándar para FCFS
+            //enqueue(queue, car); // Asumo que existe `enqueue` estándar para FCFS
             break;
         case ALG_RR:
             // scheduleCar(rrScheduler, car);
