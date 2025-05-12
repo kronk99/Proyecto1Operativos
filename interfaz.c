@@ -1,6 +1,6 @@
 #include "interfaz.h"
 #include <stdio.h>
-#include "CEthreads/include/Car.h"
+#include "Threads/Car.h"
 
 
 int iniciarInterfaz(SDL_Window** window, SDL_Renderer** renderer) {

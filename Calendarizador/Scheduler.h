@@ -1,6 +1,6 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
-#include "../CEthreads/include/Car.h"
+#include "../Threads/Car.h"
 #include "ReadyQueue.h"
 #include "algoritmos/RoundRobin.h"
 

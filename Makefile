@@ -11,11 +11,13 @@ SRCS = main.c \
 	Calendarizador/algoritmos/SJF.c \
 	Calendarizador/ReadyQueue.c \
 	Calendarizador/Scheduler.c \
-	CEthreads/src/CEmutex.c \
-	CEthreads/src/CEthread_wrapper.c \
-	CEthreads/src/CEthreads.c \
-	CEthreads/src/CEthreads_q.c \
-	CEthreads/src/futex.c \
+	Threads/CEmutex_destroy.c \
+	Threads/CEmutex_init.c \
+	Threads/CEmutex_lock.c \
+	Threads/CEmutex_unlock.c \
+	Threads/CEthread_create.c \
+	Threads/CEthread_end.c \
+	Threads/CEthread_join.c \
 	Flow/flow.c \
 	Testing.c \
 	interfaz.c

@@ -1,7 +1,7 @@
 #ifndef TESTING_H
 #define TESTING_H
 
-#include "CEthreads/include/Car.h"
+#include "Threads/Car.h"
 #include "Calendarizador/ReadyQueue.h"
 #include "Calendarizador/Scheduler.h"
 
