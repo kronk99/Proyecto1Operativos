@@ -5,6 +5,7 @@
 #include "Calendarizador/ReadyQueue.h"
 #include <stdio.h>
 #include <string.h>
+#define STACK_SIZE (1024 * 1024) 
 
 int main(int argc, char* argv[]) {
     ReadyQueue global_queue;
@@ -23,12 +24,13 @@ int main(int argc, char* argv[]) {
     }
 
     seleccionar_algoritmo(1, &global_queue, &global_queueLeft);
-    createCars(2, 2, 2, carSport, carEmergency, carNormal, &global_queue, &global_queueLeft);
+    createCars(2, 2, 0, carSport, carEmergency, carNormal, &global_queue, &global_queueLeft);
 
     printf("hola\n");
 
+    sleep(1);
     equity(2, &global_queue, &global_queueLeft);
-
+    
     int quit = 0;
     SDL_Event e;
 

@@ -1,14 +1,14 @@
 #ifndef CAR_H
 #define CAR_H
-
 #include <time.h>
 #include "CEthread.h"
 #include <SDL2/SDL_render.h>
 
-
 typedef struct {
     int id;            // identificador unico del carro
-    int position;      // posición actual en la carretera
+    atomic_int positionX; // posición actual en la carretera , posicion x
+    atomic_int hasArrived; //bandera para indicar que el hilo ha llegado
+    int posy; //el valor y no ocupa ser atomico
     int speed;         // velocidad (puede derivarse del tipo)
     int priority;      // prioridad para el algoritmo de prioridad
     int burstTime;     // tiempo estimado para cruzar (SJF)
