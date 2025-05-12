@@ -93,7 +93,7 @@ void createCars(int deportivos, int ambulancias, int normales,
         CEthread_t thread;
         thread.tid = CEthread_create(car_function, car);
         void *retval;
-        CEthread_join(thread, &retval);
+        //Ethread_join(thread, &retval);
 
         encolar_con_algoritmo(car, queueRight);
     }
@@ -112,7 +112,7 @@ void createCars(int deportivos, int ambulancias, int normales,
         CEthread_t thread;
         thread.tid = CEthread_create(car_function, car);
         void *retval;
-        CEthread_join(thread, &retval);
+        //CEthread_join(thread, &retval);
 
         encolar_con_algoritmo(car, queueLeft);
     }
@@ -131,7 +131,7 @@ void createCars(int deportivos, int ambulancias, int normales,
         CEthread_t thread;
         thread.tid = CEthread_create(car_function, car);
         void *retval;
-        CEthread_join(thread, &retval);
+        //CEthread_join(thread, &retval);
 
         encolar_con_algoritmo(car, queueRight);
     }
@@ -150,7 +150,7 @@ void createCars(int deportivos, int ambulancias, int normales,
         CEthread_t thread;
         thread.tid = CEthread_create(car_function, car);
         void *retval;
-        CEthread_join(thread, &retval);
+        //CEthread_join(thread, &retval);
 
         encolar_con_algoritmo(car, queueLeft);
     }
@@ -169,7 +169,7 @@ void createCars(int deportivos, int ambulancias, int normales,
         CEthread_t thread;
         thread.tid = CEthread_create(car_function, car);
         void *retval;
-        CEthread_join(thread, &retval);
+        //CEthread_join(thread, &retval);
 
         encolar_con_algoritmo(car, queueRight);
     }
@@ -188,7 +188,7 @@ void createCars(int deportivos, int ambulancias, int normales,
         CEthread_t thread;
         thread.tid = CEthread_create(car_function, car);
         void *retval;
-        CEthread_join(thread, &retval);
+        //CEthread_join(thread, &retval);
 
         encolar_con_algoritmo(car, queueLeft);
     }

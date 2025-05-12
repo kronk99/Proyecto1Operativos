@@ -10,28 +10,28 @@
 
 int current_direction = -1;  // -1: libre, 0: izquierda, 1: derecha
 
-void equity(int w, ReadyQueue* quequeRight, ReadyQueue* quequeLeft) {
-    while (!is_empty(quequeRight) || !is_empty(quequeLeft)) {
+void equity(int w, ReadyQueue* queueRight, ReadyQueue* queueLeft) {
+    while (!is_empty(queueRight) || !is_empty(queueLeft)) {
         // Turno izquierda a derecha
-        for (int i = 0; i < w && !is_empty(quequeLeft); i++) {
-            Car* car = siguiente_carro(quequeLeft);
+        for (int i = 0; i < w && !is_empty(queueLeft); i++) {
+            Car* car = siguiente_carro(queueLeft);
+            printf("Equity desbloqueando carro #%d (izquierda a derecha)\n", car->id);
             CEmutex_unlock(car->mutex);
-            printf("\n", car->mutex->value);
-            sleep(car->burstTime);
+            sleep(1); // Dejar que este carro cruce solo antes de dar paso al siguiente
         }
-        sleep(1);
 
         // Turno derecha a izquierda
-        for (int i = 0; i < w && !is_empty(quequeRight); i++) {
-            Car* car = siguiente_carro(quequeRight);
+        for (int i = 0; i < w && !is_empty(queueRight); i++) {
+            Car* car = siguiente_carro(queueRight);
+            printf("Equity desbloqueando carro #%d (derecha a izquierda)\n", car->id);
             CEmutex_unlock(car->mutex);
-            printf("\n", car->mutex->value);
-            sleep(car->burstTime);
+            sleep(1); // Igual, espacio entre carros
         }
     }
 
     fprintf(stderr, "Todos los carros han cruzado.\n");
 }
+
 
 /*
 // ======================= LETRERO =========================
