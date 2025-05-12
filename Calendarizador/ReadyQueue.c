@@ -14,6 +14,8 @@ Car* dequeue(ReadyQueue *q) {
     return car;
 }
 
+
+
 //hacer un metodo next para ir pintando en interfaz.
 
 int is_empty(ReadyQueue *q) {

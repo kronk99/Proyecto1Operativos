@@ -33,9 +33,21 @@ int main(int argc, char* argv[]) {
 
     // Dibujar escena inicial
     dibujarEscenario(renderer, carSport, carNormal, carEmergency, carros, cantidadCarros, largoCalle);
+    Timer tiempo;
+    atomic_init(&tiempo.dirLetrero, 0);
+    atomic_init(&tiempo.timeCount, 10);
+    tiempo.time_Value = 10;
 
-
-    equity(2, &global_queue, &global_queueLeft, carSport, carNormal, carEmergency);
+    CEthreads_t hilo;
+    hilo.start_routine = contador;
+    hilo.arg = &tiempo;
+    hilo.stack_size = STACK_SIZE;
+    hilo.is_finished = 0;
+        //crea el relog
+    //llama al letrero
+    //vamos a ver si funciona
+    letrero(&global_queue, &global_queueLeft, &tiempo);
+    //equity(2, &global_queue, &global_queueLeft, carSport, carNormal, carEmergency);
 
 
     cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);

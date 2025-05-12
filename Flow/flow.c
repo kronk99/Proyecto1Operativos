@@ -6,6 +6,7 @@
 #include "../Calendarizador/Scheduler.h"
 #include "../Calendarizador/ReadyQueue.h"
 #include "../interfaz.h"
+#include "flow.h"
 
 
 int current_direction = -1;  // -1: libre, 0: izquierda, 1: derecha
@@ -104,93 +105,59 @@ void draw_car(int tipo, int direccion, SDL_Texture* imagen_carro) {
 
 
 
-/*
+
 // ======================= LETRERO =========================
-int sing_direction = 0; // 0: izquierda, 1: derecha
 
-void* sing_car_thread(void* arg) {
-struct Car* c = (struct Car*)arg;
-
-pthread_mutex_lock(&road_mutex);
-while (sing_direction != c->side || cars_on_road > 0) {
-    pthread_cond_wait(&road_available, &road_mutex);
-}
-
-cars_on_road++;
-pthread_mutex_unlock(&road_mutex);
-
-printf("Carro %d cruzando desde %s...\n", c->id, c->side == 0 ? "IZQUIERDA" : "DERECHA");
-sleep(c->burstTime);
-printf("Carro %d ha cruzado.\n", c->id);
-
-pthread_mutex_lock(&road_mutex);
-cars_on_road--;
-if (cars_on_road == 0) {
-    pthread_cond_broadcast(&road_available);
-}
-pthread_mutex_unlock(&road_mutex);
-
-free(c);
-return NULL;
-}
-
-void sing(struct CarList* left, struct CarList* right, int interval) {
-int left_index = 0;
-int right_index = 0;
-
-while (left_index < left->count || right_index < right->count) {
-    if (sing_direction == 0 && left_index < left->count) {
-        struct Car* c = malloc(sizeof(struct Car));
-        *c = left->cars[left_index++];
-        pthread_t tid;
-        pthread_create(&tid, NULL, sing_car_thread, (void*)c);
-        pthread_detach(tid);
-    }
-
-    if (sing_direction == 1 && right_index < right->count) {
-        struct Car* c = malloc(sizeof(struct Car));
-        *c = right->cars[right_index++];
-        pthread_t tid;
-        pthread_create(&tid, NULL, sing_car_thread, (void*)c);
-        pthread_detach(tid);
-    }
-
-    sleep(1); // Intentar cruzar con cada iteración
-    interval--;
-    if (interval <= 0) {
-        pthread_mutex_lock(&road_mutex);
-        sing_direction = !sing_direction;
-        printf("==> LETRERO CAMBIÓ A: %s\n", sing_direction == 0 ? "IZQUIERDA" : "DERECHA");
-        pthread_cond_broadcast(&road_available);
-        pthread_mutex_unlock(&road_mutex);
-        interval = 5; // Reiniciar intervalo de ejemplo
+int contador(void *arg){
+    Timer *tiempo = (Timer *)arg;
+    int value=1;
+    while (value){
+        atomic_fetch_sub(&(tiempo->timeCount), 1);//le resta 1 
+            //y hace sleep
+        sleep(1); //mete un sleep para simular el conteo
+        if(tiempo->timeCount ==0){
+            printf("cambio de direccion de letrero ");
+            atomic_fetch_xor(&(tiempo->dirLetrero), 1); //si es 1 lo pone en 0 y viceversa
+            // timeCount = 10
+            atomic_store(&(tiempo->timeCount), tiempo->time_Value);  // resetea el contador
+        }
     }
 }
+    
+void letrero(ReadyQueue* queueRight, ReadyQueue* queueLeft, Timer *tiempo){
+    //int sing_direction = 0; // 0: izquierda, 1: derecha
+    while (!is_empty(queueRight) || !is_empty(queueLeft)) {// Turno izquierda a derecha
+        if(atomic_load(&(tiempo->dirLetrero))==0 && !is_empty(queueLeft)) {
+            Car* car = siguiente_carro(queueLeft);
+            printf("Equity desbloqueando carro #%d (izquierda a derecha)\n", car->id);
+            CEmutex_unlock(car->mutex);
 
-while (cars_on_road > 0) {
-    sleep(1);
+            //draw_car(car->type, car->direction, carSport, carNormal, carEmergency);
+
+            while(atomic_load(&car->hasArrived) == 0){
+                sleep(1); // Dejar que este carro cruce solo antes de dar paso al siguiente
+            }
+            //CEmutex_destroy(car->mutex);
+            //free(car);
+        }
+        else if(atomic_load(&(tiempo->dirLetrero))==1 && !is_empty(queueRight)){
+            Car* car = siguiente_carro(queueRight);
+            printf("Equity desbloqueando carro #%d (izquierda a derecha)\n", car->id);
+            CEmutex_unlock(car->mutex);
+
+            //draw_car(car->type, car->direction, carSport, carNormal, carEmergency);
+
+            while(atomic_load(&car->hasArrived) == 0){
+                sleep(1); // Dejar que este carro cruce solo antes de dar paso al siguiente
+            }
+            //CEmutex_destroy(car->mutex);
+            //free(car);
+        }
+        //hago cambio al timer:
+    }
+    fprintf(stderr, "Todos los carros han cruzado.\n");
 }
-}
-
-void* car_thread_fifo(void* arg) {
-struct Car* car = (struct Car*)arg;
-
-// Espera su turno para entrar a la carretera
-pthread_mutex_lock(&road_mutex);
-
-printf("Carro %d entrando a la carretera desde el lado %s\n", car->id,
-        car->side == 0 ? "Izquierdo" : "Derecho");
-
-// Simula el tiempo que tarda en cruzar
-sleep(car->burstTime);
-
-printf("Carro %d salió de la carretera\n", car->id);
-
-pthread_mutex_unlock(&road_mutex);
-return NULL;
-}
-
-
+/*
 void fifo(struct CarList* left, struct CarList* right) {
 while (left->count > 0 || right->count > 0) {
     int left_has = left->count > 0;
