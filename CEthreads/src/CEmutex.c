@@ -46,6 +46,7 @@ void CEmutex_lock(CEmutex_t *mutex) {
 // desbloquea el mutex (libera y despierta un hilo)
 void CEmutex_unlock(CEmutex_t *mutex) {
     atomic_store(&mutex->value, 0);
+    printf("coloque el valor del mutex en 0");
     // despierta a uno de los hilos en espera
     syscall(SYS_futex, &mutex->value, FUTEX_WAKE, 1, NULL, NULL, 0);
 }

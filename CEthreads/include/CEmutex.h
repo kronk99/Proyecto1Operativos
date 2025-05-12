@@ -1,8 +1,9 @@
 #ifndef CEMUTEX_H
 #define CEMUTEX_H
+#include <stdatomic.h>
 
 typedef struct {
-    int value;
+    atomic_int value;
 } CEmutex_t;
 
 void CEmutex_init(CEmutex_t *mutex);

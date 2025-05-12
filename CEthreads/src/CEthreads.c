@@ -68,9 +68,22 @@ int CEthread_create(void *(*start_routine)(void*), void *arg) {
 
 // para terminar un hilo
 void CEthread_end() {
+    //no eliminar para hacer prubeas, si no sirve usar este codigo entonces
+    /*
     CEthread_private_t *self_ptr = __CEthread_selfptr(); // obtiene el hilo actual
     self_ptr->state = 2;                                // lo marca como terminado
     syscall(SYS_exit, 0);                               // hace exit sin retornar al padre
+    */
+   
+     CEthread_private_t *self_ptr = __CEthread_selfptr();
+    self_ptr->state = 2;
+
+    // Si alguien hizo join, lo despertamos
+    if (self_ptr->blockedForJoin) {
+        syscall(SYS_futex, &self_ptr->tid, FUTEX_WAKE, 1);
+    }
+
+    syscall(SYS_exit, 0); // termina el hilo
 }
 
 //  para esperar a que otro hilo termine

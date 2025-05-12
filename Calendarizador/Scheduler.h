@@ -1,8 +1,8 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
-#include "Car.h"
+#include "../CEthreads/include/Car.h"
 #include "ReadyQueue.h"
-#include "RoundRobin.h"
+#include "../Calendarizador/algoritmos/RoundRobin.h"
 
 typedef enum {
     ALG_FCFS,
@@ -14,7 +14,7 @@ typedef enum {
 extern Algoritmo algoritmo_actual;
 extern ReadyQueue global_queue;
 extern ReadyQueue global_queueLeft;
-extern roundRobin* rrScheduler;
+//extern roundRobin* rrScheduler;
 
 void seleccionar_algoritmo(int seleccion);
 void encolar_con_algoritmo(Car *car,int queue);

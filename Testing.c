@@ -1,16 +1,16 @@
-#include "CEthreads.h"
-#include "CEmutex.h"
-#include "Car.h"
-#include "ReadyQueue.h"
-#include "Scheduler.h"
+#include "CEthreads/include/CEthreads.h"
+#include "CEthreads/include/CEmutex.h"
+#include "CEthreads/include/Car.h"
+#include "Calendarizador/ReadyQueue.h"
+#include "Calendarizador/Scheduler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
+#include <stdbool.h>
 #include <time.h>
 #include <string.h>
 #include "Testing.h"
-
+#include <pthread.h>
 //En este archivo estara lo necesario para utilizar en el main
 //esta es la funcion de comportamiento del carro, aca se llama a sdl para realizar el movimiento
 //y actualizar la pantalla para pintar, llamar a interfaz con cada actualizacion de movimiento
@@ -18,59 +18,53 @@
 void *car_function(void *arg) {
     Car *car = (Car *)arg;
     CEmutex_t *mutex = car->mutex;
-    //se mueve 
-    printf("Carro #%d está esperando el mutex para cruzar...\n", car->id);
-    CEmutex_lock(mutex); //espera hasta que le haga un unlock en otro lado
+    
+    //CEmutex_lock(mutex); //espera hasta que le haga un unlock en otro lado
+    while(atomic_load(&(car->mutex->value))){ //espera que se le haga unlock al mutex , unlock es 0
+        printf("mutex no cambiado...\n");
+        printf("valor delmutex en carFUnction %d .\n", atomic_load(&(car->mutex->value)));
+        printf("valor delmutex en carfunction por ref %d .\n", car->mutex->value);
+        sleep(10); //hago sleep para darle tiempo a cambiar
+    }
+    printf("Carro #%d se le hizo unlock al mutex...\n", car->id);
     //es decir la funcion que va a descalendarizar los carros
+    atomic_store(&(car->hasArrived), 0); //RECUERDE INICIALIZAR ANTES DE SETEARLA
+    while(!atomic_load(&(car->hasArrived))){
+        if(car->direction==1){ //si la direccion es de derecha a izquierda
+            atomic_fetch_sub(&(car->positionX), 1); //le resta 1 a la posicion actual
+             printf("carro cruzando a la izquierda");
+            if(atomic_load(&(car->positionX)) < 20){ //si es menor a 20
+                atomic_store(&(car->hasArrived), 1);
+               
+            }
+            sleep(1); //duerme un poco
+            //llama a la funcion pintar carro
+        }
+        else{ //si la direccion es de izquierda a derecha
+            atomic_fetch_add(&(car->positionX), 1);
+             printf("carro cruzanndndo a la derecha");
+            if(atomic_load(&(car->positionX)) > 400){ //si es menor al maximo valor de la calle.
+                //este valor deberia ser accesible para todos, cambiarlo luego para la prueba
+                atomic_store(&(car->hasArrived), 1);
+            }
+            sleep(1); //debe dormir una cantidad 
+            //llama al paintAll, si no , que el paintall tambien sea un hilo y accedo al 
+            //car position x al pintarlo, solo que si se llama paintall desde otro lado
+            //debe de haber concurrencia al pintar entre hilos, para que le de tiempo de actualizar
+            //las posiciones 
+        }
+        
+    }
 
-    printf("Carro #%d (tipo %d, prioridad %d) está cruzando (mutex adquirido)\n", car->id, car->type, car->priority);
-    sleep(car->burstTime);
     printf("Carro #%d ha cruzado (mutex liberado)\n", car->id);
-
-    CEmutex_unlock(mutex);
+    //CEmutex_unlock(mutex);
+    pthread_exit(NULL);  // termina el hilo correctamente
+  // mata el hilo (nunca retorna)
+    //deberia de destuir el hilo
     //aca hace falta un metodo de pintado global ()paintall
-
-    free(car);
+    //free(car); el free lo hace en el manejador de direccion
     return NULL;
 }
-//Archivo de configuracion del juego
-void ejecutarSimulacion(Car** carros, int cantidadCarros, const char* tipoCalendarizador) {
-    srand(time(NULL));
-    CEmutex_t mutex;
-    CEmutex_init(&mutex);
-
-    if (strcmp(tipoCalendarizador, "FCFS") == 0) seleccionar_algoritmo(0);
-    else if (strcmp(tipoCalendarizador, "SJF") == 0) seleccionar_algoritmo(1);
-    else if (strcmp(tipoCalendarizador, "Prioridad") == 0) seleccionar_algoritmo(2);
-    else seleccionar_algoritmo(0);  // por defecto
-
-    for (int i = 0; i < cantidadCarros; i++) {
-        carros[i]->speed = carros[i]->type + 1;
-        carros[i]->burstTime = 4 - carros[i]->speed;
-        carros[i]->priority = rand() % 5;
-        carros[i]->position = 0;
-        clock_gettime(CLOCK_REALTIME, &carros[i]->arrival_time);
-        carros[i]->mutex = &mutex;
-        encolar_con_algoritmo(carros[i]);
-    }
-
-    while (!is_empty(&global_queue)) {
-        Car* car = siguiente_carro();
-        CEthread_t thread;
-        printf("Lanzando carro #%d\n", car->id);
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
-        void* retval;
-        CEthread_join(thread, &retval);
-        printf("Carro #%d terminó correctamente\n", car->id);
-    }
-
-    puts("Todos los carros han cruzado.");
-    CEmutex_destroy(&mutex);
-}
-//metodo para crear los carros en base al input , existiran entonces 2 filas de listo en scheduler
-//esto va a ocupar un parametro extra para indicar a cual de las 2 colas insertar
-//esto es para la insercion predefinida, para la insercion en excecute es diferente btw
 void createCars(int deportivos, int ambulancias, int normales, SDL_Texture* carSport,SDL_Texture* carAmbulance,SDL_Texture* carNormal){
     //esto falta de perfeccionar, dado que a carro le hace falta mas datos para encolar
     //como porejemplo que las ambulancias tienen una prioridad , entonces se deberian 
@@ -84,30 +78,32 @@ void createCars(int deportivos, int ambulancias, int normales, SDL_Texture* carS
     for (int j = 0; j < deportivos; j++) {
         //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
-        car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
+        //car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
+        atomic_init(&(car->hasArrived), 0);
         CEmutex_init(car_mutex); //inicia el mutex
         CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
         //se va a ejecutar de una
-        car->mutex =car_mutex;
+        car->mutex =malloc(sizeof(CEmutex_t));
         car->id = id++;
         car->type = 1;
         car->direction = 1; // 0: izquierda a derecha, 1: derecha a izquierda
         car->carTexture = carSport;
         //genera el hilo
-        CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
-        void *retval;
-        CEthread_join(thread, &retval);
+        pthread_t thread;
+        pthread_create(&thread, NULL, car_function, (void *)car);
+        //CEthread_join(thread, &retval);
         //end generar hilo, esta dormido ya que inicio con el mutex tomado
         //se necesita un algoritmo descolador que le haga pop a la cola, y haga
         //car ->unlock mutex.
+        //POSIBLE ERROR.
         encolar_con_algoritmo(car,1); //lo encola , el numero es el tipo de calendarizador
+        printf("success");
     }
     for (int j = 0; j < deportivos; j++) {
         //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
         car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
+        atomic_init(&(car->hasArrived), 0);
         CEmutex_init(car_mutex); //inicia el mutex
         CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
         //se va a ejecutar de una
@@ -117,21 +113,20 @@ void createCars(int deportivos, int ambulancias, int normales, SDL_Texture* carS
         car->direction = 0; // 0: izquierda a derecha, 1: derecha a izquierda
         car->carTexture = carSport;
         //genera el hilo
-        CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
-        void *retval;
-        CEthread_join(thread, &retval);
+        pthread_t thread;
+        pthread_create(&thread, NULL, car_function, (void *)car);
+        //CEthread_join(thread, &retval);
         //end generar hilo, esta dormido ya que inicio con el mutex tomado
         //se necesita un algoritmo descolador que le haga pop a la cola, y haga
         //car ->unlock mutex.
         encolar_con_algoritmo(car,0); //lo encola
-
+        printf("success");
     }
     for (int j = 0; j < normales; j++) {
         //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
         car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
+        atomic_init(&(car->hasArrived), 0);
         CEmutex_init(car_mutex); //inicia el mutex
         CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
         //se va a ejecutar de una
@@ -141,21 +136,21 @@ void createCars(int deportivos, int ambulancias, int normales, SDL_Texture* carS
         car->direction = 1; // 0: izquierda a derecha, 1: derecha a izquierda
         car->carTexture = carNormal;
         //genera el hilo
-        CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
-        void *retval;
-        CEthread_join(thread, &retval);
+        pthread_t thread;
+        pthread_create(&thread, NULL, car_function, (void *)car);
+        //CEthread_join(thread, &retval);
         //end generar hilo, esta dormido ya que inicio con el mutex tomado
         //se necesita un algoritmo descolador que le haga pop a la cola, y haga
         //car ->unlock mutex.
         encolar_con_algoritmo(car,1); //lo encola
+        printf("success");
 
     }
     for (int j = 0; j < normales; j++) {
         //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
         car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
+        atomic_init(&(car->hasArrived), 0);
         CEmutex_init(car_mutex); //inicia el mutex
         CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
         //se va a ejecutar de una
@@ -165,21 +160,20 @@ void createCars(int deportivos, int ambulancias, int normales, SDL_Texture* carS
         car->direction = 0; // 0: izquierda a derecha, 1: derecha a izquierda
         car->carTexture = carNormal;
         //genera el hilo
-        CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
-        void *retval;
-        CEthread_join(thread, &retval);
+        pthread_t thread;
+        pthread_create(&thread, NULL, car_function, (void *)car);
+        //CEthread_join(thread, &retval);
         //end generar hilo, esta dormido ya que inicio con el mutex tomado
         //se necesita un algoritmo descolador que le haga pop a la cola, y haga
         //car ->unlock mutex.
         encolar_con_algoritmo(car,0); //lo encola
-
+        printf("success");
     }
     for (int j = 0; j < ambulancias; j++) {
         //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
         car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
+        atomic_init(&(car->hasArrived), 0);
         CEmutex_init(car_mutex); //inicia el mutex
         CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
         //se va a ejecutar de una
@@ -189,40 +183,38 @@ void createCars(int deportivos, int ambulancias, int normales, SDL_Texture* carS
         car->direction = 1; // 0: izquierda a derecha, 1: derecha a izquierda
         car->carTexture = carAmbulance;
         //genera el hilo
-        CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
-        void *retval;
-        CEthread_join(thread, &retval);
+        pthread_t thread;
+        pthread_create(&thread, NULL, car_function, (void *)car);
+       // CEthread_join(thread, &retval);
         //end generar hilo, esta dormido ya que inicio con el mutex tomado
         //se necesita un algoritmo descolador que le haga pop a la cola, y haga
         //car ->unlock mutex.
         encolar_con_algoritmo(car,1); //lo encola
-
+        printf("success");
     }
     for (int j = 0; j < ambulancias ;j++) {
         //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
         car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
+        car->direction=1;
+        atomic_init(&(car->hasArrived), 0);
         CEmutex_init(car_mutex); //inicia el mutex
         CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
         //se va a ejecutar de una
         car->mutex =car_mutex;
         car->id = id++;
         car->type = 2;
-        car->direction = 0; // 0: izquierda a derecha, 1: derecha a izquierda
+        //car->direction = 0; // 0: izquierda a derecha, 1: derecha a izquierda
         car->carTexture = carAmbulance;
         //genera el hilo
-        CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
-        void *retval;
-        CEthread_join(thread, &retval);
+        pthread_t thread;
+        pthread_create(&thread, NULL, car_function, (void *)car);
+        //CEthread_join(thread, &retval);
         //end generar hilo, esta dormido ya que inicio con el mutex tomado
         //se necesita un algoritmo descolador que le haga pop a la cola, y haga
         //car ->unlock mutex.
         encolar_con_algoritmo(car,0); //lo encola
-
+        printf("success");
     }
     //normales son 0, ambulancias son 2
     //RECUERDE, DEBE DE HACERLE FREE(CAR), cuando el carro complete segun el algoritmo!!!
@@ -237,10 +229,13 @@ void initQueue(int tipoCalendarizador){
 //No sé si el W se pasa automaticamente cuando se llama esta funcion o si se guarda de manera global en alguna parte
 //Pasaría lo mismo con time, no se si de pasa o se agarra de otro lado
 //Se necesita modificar el struct del carro para que tenga posx y posy iniciales indicando si es del lado derecho o izquierdo
-void dequeue(int tipo_flujo, int W, double time) {
+void* flujo_carros(void* arg) {
     //Ya para este punto se tuvo que haber pasado por el calendarizador, entonces, agarro los carros en ese orden
     //Necesito agarrar el carro y entonces aplicarle CEmutex_unlock para indicar que ese carro(hilo) tiene permiso para ejecutarse
-    int currentSide = 0; // Comenzamos con los carros de la izquierda
+    int currentSide = 1; // Comenzamos con los carros de la izquierda
+    int tipo_flujo=1; //cambiado para que funque
+    int W =2;
+
     switch (tipo_flujo) {
         case 1:
             /*
@@ -249,7 +244,7 @@ void dequeue(int tipo_flujo, int W, double time) {
             derecha a izquierda. En caso de que en alguno de los lados no haya carros, se debe garantizar el flujo 
             de vehículos desde el lado donde sí los haya.
             */
-
+           int count = 0;
             //Logica
             // Agarro el primer hilo de la lista calendarizada. 
             // Llamo a CEmutex_unlock para establecer que esta listo para ejecutarse el hilo
@@ -257,62 +252,80 @@ void dequeue(int tipo_flujo, int W, double time) {
             // Lo pinto y lo voy moviendo, la verificacion es con las coordenadas de limite, estas hay que agregarlas de alguna manera tal vez
             // estableciendolas desde este archivo testing.
             // Una vez que termina debo elimnar la imagen, destruir el mutex, el hilo y liberar el espacio
-
             //Este while es para estar verificando que la lista no este vacia
-            while (!is_empty(&global_queue)) {
-                //Esta varible es el limite que se compara con el W
-                count = 0;
-
-                // Este for me sirve para pasar solo w carros de cierto lado
-                for (int i = 0; i < global_queue.count && count < W; i++) {
-                    struct Car* car = &global_queue.cars[i];
-
-                    siguiente = true;
-
-                    //este while es para que se este realizando el movimiento del mismo carro
-                    //siguiente es la variable que me ayuda a estar haciendo el while sobre el mismo carro
-                    while(siguiente){
-                        if (car->side == currentSide) {
-
-                            // Se desbloquea el mutex para que el hilo pueda empezar a moverse
-                            CEmutex_unlock(car->mutex);
-
-                                //Verifico si el movimiento que se esta realizando es de izquierda a derecha
-                                //para saber cuales limites son lo que se debe usar
-                                if(car->side == 0){ //Movimiento a la derecha
-                                    if(car->posx >= limite_derecha){
-                                        //Tengo que destruir todo e incluso quitar la imagen
-                                    }
-                                    //No se ha llegado al limite entonces sigo moviendo a la derecha
-                                    else{
-                                        //Llamar a la funcion que se encarga del movimiento
-                                    }
-                                    
-                                }
-                                else{
-                                    if(car->posx <= limite_izquierda){
-                                        //Tengo que destruir todo
-                                    }
-                                    else{
-                                        //Llamar a la funcion que se encarga del movimiento
-                                    }
-
-                                }
+            bool value = true;
+            count = W; // reseteo el contador
+            while(value){ //esto es un while true;
+                printf("entre al while\n");
+                if(currentSide ==1){ //si esla derecha
+                    if(!is_empty(&global_queue)){ //si la cola no esta vacia
+                        //hago dequeue
+                        sleep(10);
+                        printf("hago dequeue\n");
+                        Car *currentcar = dequeue(&global_queue);
+                        //CEmutex_unlock(currentcar->mutex); //desbloquea el mutex para 
+                        atomic_store(&(currentcar->mutex->value), 0);
+                        //que el carro avance., en estos momentos el carro deberia de estar
+                        //aca deberia de ponerlo en 0
+                        printf("el valor es %d \n",currentcar->mutex->value);
+                        //avanzando en la carretera.
+                        printf("Se desbloqueo el mutex\n");
+                        while(!atomic_load(&(currentcar->hasArrived))){ //se pone a esperar a que el carro llegue al otro lado
+                            //espera a que le indiquen que el carro ha llegado
+                            //printf("Carro cruzando: %d\n", currentcar->id);
+                            //falta destruir carro y mutex
+                            printf("Sexoooooo \n");
+                            sleep(5);
+                            printf("el valor DEL MUTEX EN DEQUEUE ES: %d",currentcar->mutex->value);
                         }
-                        //Significa que me tope en la lista un carro que va en el otro lado entonces hago false el while para que 
-                        //se pase al siguiente en la lista con el 
-                        siguiente = false;
+                        printf("CARRO HA TERMINADO DE CRUZAR Y SE VA A ELIMINAR \n" );
 
+//VOY A HACER UNA PRUEBA : CAMBIANDO EL CETHREADS A PTHREADS
+//
+
+                        //cuando sale de esperar el carro, le resta al count
+                        count -=1; //le quita1 al contador
+                        //checkea si el count llego a 0 para el cambio
+                        if(count ==0){
+                            currentSide = 0; //cambia de lado a cola izquierda
+                            count = W; // reseteo el contador
+                        }
                     }
-                    count++;
+                    else{ //si esta vacia, cambio de lado
+                        printf("cambie de lado \n"); 
+                        currentSide = 0; //cambia de lado a cola izquierda
+                        count = W; // reseteo el contador
+                    }
                 }
+                else{//si es izquierda
+                    if(!is_empty(&global_queueLeft)){ //si la cola no esta vacia
+                        //hago dequeue
+                        Car *currentcar = dequeue(&global_queueLeft);
+                        CEmutex_unlock(currentcar->mutex); //desbloquea el mutex para 
+                        //que el carro avance., en estos momentos el carro deberia de estar
+                        //avanzando en la carretera.
+                        while(!atomic_load(&(currentcar->hasArrived))){ //se pone a esperar a que el carro llegue al otro lado
+                            //espera a que le indiquen que el carro ha llegado
+                            
 
-                // Cambiar de lado
-                currentSide = (currentSide == 0) ? 1 : 0;
-                count = 0;
+                        }
+                        printf("Carro termino de cruzar: %d\n", currentcar->id);
+                        //cuando sale de esperar el carro, le resta al count
+                        count -=1; //le quita1 al contador
+                        //checkea si el count llego a 0 para el cambio
+                        //Destruyo el carro y su mutex (Dado que no se debe de reencolar)
+
+                        if(count ==0){
+                            currentSide = 1; //cambia de lado a cola derecha
+                            count = W; // reseteo el contador
+                        }
+                    }
+                    else{ //si esta vacia, cambio de lado 
+                        currentSide = 1; //cambia de lado a cola izquierda
+                        count = W; // reseteo el contador
+                }
             }
-
-            printf("Aplicando flujo de tipo Equidad...\n");
+            
             // Aquí va la implementación de Equidad
             break;
 
@@ -332,10 +345,9 @@ void dequeue(int tipo_flujo, int W, double time) {
         default:
             printf("Tipo de flujo no válido: %d\n", tipo_flujo);
             break;
+        }
     }
 }
-
-
 /*
 //#define NUM_CARROS 
 

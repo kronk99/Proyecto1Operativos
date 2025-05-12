@@ -1,8 +1,8 @@
 Largo de la calle: 100
-Cantidad de carros: 5
+Cantidad de carros: 2
 Tipo de calendarizador: RR
 Tipo de flujo: Equidad
-Tiempo del letrero: 4
-Cantidad inicial carros deportivos: 2
-Cantidad inicial carros normales: 3
+Tiempo del letrero: 1
+Cantidad inicial carros deportivos: 1
+Cantidad inicial carros normales: 1
 Cantidad inicial carros emergencia: 0

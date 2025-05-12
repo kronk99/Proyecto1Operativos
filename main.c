@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <pthread.h> //ADDED
+
 int main(int argc, char* argv[]) {
     int largoCalle;
     int cantidadCarros;
@@ -128,7 +130,7 @@ int main(int argc, char* argv[]) {
     //listo y tambien para la cola de pintado en interfaz
 
 
-     
+     /**/
     // ======= INICIAR INTERFAZ GRAFICA =======
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
@@ -144,10 +146,22 @@ int main(int argc, char* argv[]) {
     //=======CAR CREATION=============
     //para dudas ver metodo createCars en testing.
     createCars(cantidadDeportivos,cantidadEmergencia,cantidadNormales,carSport,carEmergency,carNormal);
+    //crea el thread para que crucen
+    pthread_t hilo; // identificador del hilo
+    if (pthread_create(&hilo, NULL, flujo_carros(), NULL) != 0) {
+        perror("Error al crear el hilo");
+        return 1;
+    }
+
+    // Esperar a que el hilo termine
+    pthread_join(hilo, NULL);
+
+    printf("Hilo finalizado.\n");
     //crea los carros y LOS CALENDARIZA, ATENTOA ESO ,debe de ser diferente cuando sea por
     //botones
+    /*
     int quit = 0;
-    SDL_Event e;
+    SDL_Event e
 
 
     while (!quit) {
@@ -160,12 +174,10 @@ int main(int argc, char* argv[]) {
 
     ejecutarSimulacion(listaCarros, 2*cantidadCarros, tipoCalendarizador);  // ejecutar testing
 
-    cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);
+    cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);*/
     return 0;
 }
 //letrero
 //dequeue car
 // si el carro ya llego al otro lado
-//dequeue
-------------- #bloqueo
---
+//deque

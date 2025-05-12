@@ -1,7 +1,7 @@
 #ifndef READY_QUEUE_H
 #define READY_QUEUE_H
 
-#include "Car.h"
+#include "../CEthreads/include/Car.h"
 
 typedef struct Node {
     Car *car;
