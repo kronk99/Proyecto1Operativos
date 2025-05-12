@@ -15,4 +15,6 @@ SDL_Texture* cargarCarro(SDL_Renderer* renderer, const char* path);
 void dibujarEscenario(SDL_Renderer* renderer, SDL_Texture* carSport, SDL_Texture* carNormal, SDL_Texture* carEmergency, Car** carros, int cantidadCarros, int largoCalle);
 void cerrarInterfaz(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* carSport, SDL_Texture* carNormal, SDL_Texture* carEmergency);
 
+extern SDL_Renderer* globalRenderer;
+
 #endif

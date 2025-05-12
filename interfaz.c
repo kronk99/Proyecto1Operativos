@@ -3,6 +3,8 @@
 #include "Threads/Car.h"
 
 
+SDL_Renderer* globalRenderer = NULL;
+
 int iniciarInterfaz(SDL_Window** window, SDL_Renderer** renderer) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("Error inicializando SDL: %s\n", SDL_GetError());
@@ -20,7 +22,7 @@ int iniciarInterfaz(SDL_Window** window, SDL_Renderer** renderer) {
         printf("No se pudo crear el renderer: %s\n", SDL_GetError());
         return 0;
     }
-
+    globalRenderer = *renderer;
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
         printf("No se pudo inicializar SDL_image: %s\n", IMG_GetError());
         return 0;

@@ -11,6 +11,8 @@
 #include <string.h>
 #include "Testing.h"
 #include "Threads/CEthread.h"
+#include "interfaz.h"
+#include "Flow/flow.h"
 
 #define STACK_SIZE (1024 * 1024)  // 1 MB pila
 //En este archivo estara lo necesario para utilizar en el main
@@ -23,36 +25,18 @@ int car_function(void *arg) {
     //CEmutex_lock(mutex); //espera hasta que le haga un unlock en otro lado
     CEmutex_lock(car->mutex); //espera agarrar el mutex
     printf("Carro #%d se le hizo unlock al mutex...\n", car->id);
-    //es decir la funcion que va a descalendarizar los carros
-    atomic_store(&(car->hasArrived), 0); //RECUERDE INICIALIZAR ANTES DE SETEARLA
-    while(!atomic_load(&(car->hasArrived))){
-        if(car->direction==1){ //si la direccion es de derecha a izquierda
-            atomic_fetch_sub(&(car->positionX), 1); //le resta 1 a la posicion actual
-             printf("carro cruzando a la izquierda");
-            if(atomic_load(&(car->positionX)) < 20){ //si es menor a 20
-                atomic_store(&(car->hasArrived), 1);
-               
-            }
-            sleep(1); //duerme un poco
-            //llama a la funcion pintar carro
-        }
-        else{ //si la direccion es de izquierda a derecha
-            atomic_fetch_add(&(car->positionX), 1);
-             printf("carro cruzanndndo a la derecha");
-            if(atomic_load(&(car->positionX)) > 400){ //si es menor al maximo valor de la calle.
-                //este valor deberia ser accesible para todos, cambiarlo luego para la prueba
-                atomic_store(&(car->hasArrived), 1);
-            }
-            sleep(1); //debe dormir una cantidad 
-            //llama al paintAll, si no , que el paintall tambien sea un hilo y accedo al 
-            //car position x al pintarlo, solo que si se llama paintall desde otro lado
-            //debe de haber concurrencia al pintar entre hilos, para que le de tiempo de actualizar
-            //las posiciones 
-        }
-        
-    }
+
+    draw_car(car->type, car->direction, car->carTexture);
+
+    atomic_store(&car->hasArrived, 1);
+
+    //Recordar liberar la memoria del carro 
+
+
     printf("Carro #%d ha cruzado (mutex liberado)\n", car->id);
     CEmutex_unlock(car->mutex);
+
+    //CEthread_end();
     //CEmutex_unlock(mutex);
     //pthread_exit(NULL);  // termina el hilo correctamente
   // mata el hilo (nunca retorna)
@@ -241,6 +225,8 @@ void createCars(int deportivos, int ambulancias, int normales,
         car->type = 1;
         car->direction = 1; // derecha a izquierda
         car->carTexture = carSport;
+        atomic_init(&car->hasArrived, 0);
+
 
         CEthreads_t car_thread;
 
@@ -268,6 +254,8 @@ void createCars(int deportivos, int ambulancias, int normales,
         car->type = 1;
         car->direction = 0; // izquierda a derecha
         car->carTexture = carSport;
+        atomic_init(&car->hasArrived, 0);
+
 
         CEthreads_t car_thread;
 
@@ -294,6 +282,8 @@ void createCars(int deportivos, int ambulancias, int normales,
         car->type = 0;
         car->direction = 1; // derecha a izquierda
         car->carTexture = carNormal;
+        atomic_init(&car->hasArrived, 0);
+
 
         CEthreads_t car_thread;
 
@@ -320,6 +310,8 @@ void createCars(int deportivos, int ambulancias, int normales,
         car->type = 0;
         car->direction = 0; // izquierda a derecha
         car->carTexture = carNormal;
+        atomic_init(&car->hasArrived, 0);
+
 
         CEthreads_t car_thread;
 
@@ -346,6 +338,8 @@ void createCars(int deportivos, int ambulancias, int normales,
         car->type = 2;
         car->direction = 1; // derecha a izquierda
         car->carTexture = carAmbulance;
+        atomic_init(&car->hasArrived, 0);
+
 
         CEthreads_t car_thread;
 
@@ -372,6 +366,8 @@ void createCars(int deportivos, int ambulancias, int normales,
         car->type = 2;
         car->direction = 0; // izquierda a derecha
         car->carTexture = carAmbulance;
+        atomic_init(&car->hasArrived, 0);
+
 
         CEthreads_t car_thread;
 

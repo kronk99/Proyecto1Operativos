@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "scheduler.h": "c",
+        "interfaz.h": "c",
+        "cethread.h": "c"
+    }
+}

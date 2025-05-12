@@ -5,18 +5,26 @@
 #include "../Threads/CEthread.h"
 #include "../Calendarizador/Scheduler.h"
 #include "../Calendarizador/ReadyQueue.h"
+#include "../interfaz.h"
 
 
 int current_direction = -1;  // -1: libre, 0: izquierda, 1: derecha
 
-void equity(int w, ReadyQueue* queueRight, ReadyQueue* queueLeft) {
+void equity(int w, ReadyQueue* queueRight, ReadyQueue* queueLeft, SDL_Texture* carSport, SDL_Texture* carNormal, SDL_Texture* carEmergency) {
     while (!is_empty(queueRight) || !is_empty(queueLeft)) {
         // Turno izquierda a derecha
         for (int i = 0; i < w && !is_empty(queueLeft); i++) {
             Car* car = siguiente_carro(queueLeft);
             printf("Equity desbloqueando carro #%d (izquierda a derecha)\n", car->id);
             CEmutex_unlock(car->mutex);
-            sleep(1); // Dejar que este carro cruce solo antes de dar paso al siguiente
+
+            //draw_car(car->type, car->direction, carSport, carNormal, carEmergency);
+
+            while(atomic_load(&car->hasArrived) == 0){
+                sleep(1); // Dejar que este carro cruce solo antes de dar paso al siguiente
+            }
+            //CEmutex_destroy(car->mutex);
+            //free(car);
         }
 
         // Turno derecha a izquierda
@@ -24,12 +32,76 @@ void equity(int w, ReadyQueue* queueRight, ReadyQueue* queueLeft) {
             Car* car = siguiente_carro(queueRight);
             printf("Equity desbloqueando carro #%d (derecha a izquierda)\n", car->id);
             CEmutex_unlock(car->mutex);
-            sleep(1); // Igual, espacio entre carros
+            //draw_car(car->type, car->direction, carSport, carNormal, carEmergency);
+
+
+            while(atomic_load(&car->hasArrived) == 0){
+                sleep(1); // Dejar que este carro cruce solo antes de dar paso al siguiente
+            }
+            //CEmutex_destroy(car->mutex);
+            //free(car);
         }
     }
 
     fprintf(stderr, "Todos los carros han cruzado.\n");
 }
+
+void draw_car(int tipo, int direccion, SDL_Texture* imagen_carro) {
+    SDL_Texture* textura = NULL;
+
+    textura = imagen_carro;
+
+    int y = WINDOW_HEIGHT / 2 - 15; // centro vertical
+    int w = 70, h = 40;             // tamaño del carro
+    int startX, endX, step;
+
+    if (direccion == 0) { // izquierda a derecha
+        startX = 0;
+        endX = WINDOW_WIDTH;
+        if(tipo == 0){
+            step = 2;
+        }
+        else if (tipo == 1)
+        {
+            step = 3;
+        }
+        else{
+            step = 5;
+        }
+        
+    } else {              // derecha a izquierda
+        startX = WINDOW_WIDTH;
+        endX = 0 - w;
+        if(tipo == 0){
+            step = -2;
+        }
+        else if (tipo == 1)
+        {
+            step = -3;
+        }
+        else{
+            step = -5;
+        }
+    }
+
+    for (int x = startX; (direccion == 0 ? x < endX : x > endX); x += step) {
+        SDL_SetRenderDrawColor(globalRenderer, 0, 0, 0, 255);
+        SDL_RenderClear(globalRenderer);
+
+        // Opcional: podés redibujar el fondo/escenario si querés mantenerlo
+        dibujarEscenario(globalRenderer, imagen_carro, imagen_carro, imagen_carro, NULL, 0, 600);
+
+        SDL_Rect carRect = {x, y, w, h};
+        if (direccion == 0)
+            SDL_RenderCopyEx(globalRenderer, textura, NULL, &carRect, 0, NULL, SDL_FLIP_HORIZONTAL);
+        else
+            SDL_RenderCopy(globalRenderer, textura, NULL, &carRect);
+
+        SDL_RenderPresent(globalRenderer);
+        SDL_Delay(10); // control de velocidad
+    }
+}
+
 
 
 /*
