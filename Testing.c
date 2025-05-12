@@ -1,8 +1,8 @@
-#include "CEthreads.h"
-#include "CEmutex.h"
-#include "Car.h"
-#include "ReadyQueue.h"
-#include "Scheduler.h"
+#include "CEthreads/include/CEthreads.h"
+#include "CEthreads/include/CEmutex.h"
+#include "CEthreads/include/Car.h"
+#include "Calendarizador/ReadyQueue.h"
+#include "Calendarizador/Scheduler.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -20,9 +20,8 @@ void *car_function(void *arg) {
     CEmutex_t *mutex = car->mutex;
     //se mueve 
     printf("Carro #%d está esperando el mutex para cruzar...\n", car->id);
-    CEmutex_lock(mutex); //espera hasta que le haga un unlock en otro lado
     //es decir la funcion que va a descalendarizar los carros
-
+    CEmutex_lock(car->mutex);
     printf("Carro #%d (tipo %d, prioridad %d) está cruzando (mutex adquirido)\n", car->id, car->type, car->priority);
     sleep(car->burstTime);
     printf("Carro #%d ha cruzado (mutex liberado)\n", car->id);
@@ -33,6 +32,8 @@ void *car_function(void *arg) {
     free(car);
     return NULL;
 }
+
+/*
 //Archivo de configuracion del juego
 void ejecutarSimulacion(Car** carros, int cantidadCarros, const char* tipoCalendarizador) {
     srand(time(NULL));
@@ -68,166 +69,132 @@ void ejecutarSimulacion(Car** carros, int cantidadCarros, const char* tipoCalend
     puts("Todos los carros han cruzado.");
     CEmutex_destroy(&mutex);
 }
-//metodo para crear los carros en base al input , existiran entonces 2 filas de listo en scheduler
-//esto va a ocupar un parametro extra para indicar a cual de las 2 colas insertar
-//esto es para la insercion predefinida, para la insercion en excecute es diferente btw
-void createCars(int deportivos, int ambulancias, int normales, SDL_Texture* carSport,SDL_Texture* carAmbulance,SDL_Texture* carNormal){
-    //esto falta de perfeccionar, dado que a carro le hace falta mas datos para encolar
-    //como porejemplo que las ambulancias tienen una prioridad , entonces se deberian 
-    //de encolar primero independientemente del algoritmo
-    // === CREAR LISTA DE CARROS ===
-    //init_queue(&global_queue);
-    //init_queue(&global_queueLeft);
-    //llamo de una vez al algoritmo de calendarizado 
-    CEmutex_t *car_mutex; //mutex del carro, para bloquear el hilo.
-    int id=0;
+
+*/
+
+void createCars(int deportivos, int ambulancias, int normales, 
+                SDL_Texture* carSport, SDL_Texture* carAmbulance, SDL_Texture* carNormal,
+                ReadyQueue* queueRight, ReadyQueue* queueLeft) {
+
+    CEmutex_t *car_mutex; // mutex para el carro
+    int id = 0;
+
     for (int j = 0; j < deportivos; j++) {
-        //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
-        car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
-        CEmutex_init(car_mutex); //inicia el mutex
-        CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
-        //se va a ejecutar de una
-        car->mutex =car_mutex;
+        car_mutex = malloc(sizeof(CEmutex_t));
+        CEmutex_init(car_mutex);
+        CEmutex_lock(car_mutex);
+        car->mutex = car_mutex;
         car->id = id++;
         car->type = 1;
-        car->direction = 1; // 0: izquierda a derecha, 1: derecha a izquierda
+        car->direction = 1; // derecha a izquierda
         car->carTexture = carSport;
-        //genera el hilo
+
         CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
+        thread.tid = CEthread_create(car_function, car);
         void *retval;
         CEthread_join(thread, &retval);
-        //end generar hilo, esta dormido ya que inicio con el mutex tomado
-        //se necesita un algoritmo descolador que le haga pop a la cola, y haga
-        //car ->unlock mutex.
-        encolar_con_algoritmo(car,1); //lo encola , el numero es el tipo de calendarizador
+
+        encolar_con_algoritmo(car, queueRight);
     }
+
     for (int j = 0; j < deportivos; j++) {
-        //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
-        car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
-        CEmutex_init(car_mutex); //inicia el mutex
-        CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
-        //se va a ejecutar de una
-        car->mutex =car_mutex;
+        car_mutex = malloc(sizeof(CEmutex_t));
+        CEmutex_init(car_mutex);
+        CEmutex_lock(car_mutex);
+        car->mutex = car_mutex;
         car->id = id++;
         car->type = 1;
-        car->direction = 0; // 0: izquierda a derecha, 1: derecha a izquierda
+        car->direction = 0; // izquierda a derecha
         car->carTexture = carSport;
-        //genera el hilo
+
         CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
+        thread.tid = CEthread_create(car_function, car);
         void *retval;
         CEthread_join(thread, &retval);
-        //end generar hilo, esta dormido ya que inicio con el mutex tomado
-        //se necesita un algoritmo descolador que le haga pop a la cola, y haga
-        //car ->unlock mutex.
-        encolar_con_algoritmo(car,0); //lo encola
 
+        encolar_con_algoritmo(car, queueLeft);
     }
+
     for (int j = 0; j < normales; j++) {
-        //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
-        car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
-        CEmutex_init(car_mutex); //inicia el mutex
-        CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
-        //se va a ejecutar de una
-        car->mutex =car_mutex;
+        car_mutex = malloc(sizeof(CEmutex_t));
+        CEmutex_init(car_mutex);
+        CEmutex_lock(car_mutex);
+        car->mutex = car_mutex;
         car->id = id++;
         car->type = 0;
-        car->direction = 1; // 0: izquierda a derecha, 1: derecha a izquierda
+        car->direction = 1; // derecha a izquierda
         car->carTexture = carNormal;
-        //genera el hilo
+
         CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
+        thread.tid = CEthread_create(car_function, car);
         void *retval;
         CEthread_join(thread, &retval);
-        //end generar hilo, esta dormido ya que inicio con el mutex tomado
-        //se necesita un algoritmo descolador que le haga pop a la cola, y haga
-        //car ->unlock mutex.
-        encolar_con_algoritmo(car,1); //lo encola
 
+        encolar_con_algoritmo(car, queueRight);
     }
+
     for (int j = 0; j < normales; j++) {
-        //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
-        car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
-        CEmutex_init(car_mutex); //inicia el mutex
-        CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
-        //se va a ejecutar de una
-        car->mutex =car_mutex;
+        car_mutex = malloc(sizeof(CEmutex_t));
+        CEmutex_init(car_mutex);
+        CEmutex_lock(car_mutex);
+        car->mutex = car_mutex;
         car->id = id++;
         car->type = 0;
-        car->direction = 0; // 0: izquierda a derecha, 1: derecha a izquierda
+        car->direction = 0; // izquierda a derecha
         car->carTexture = carNormal;
-        //genera el hilo
+
         CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
+        thread.tid = CEthread_create(car_function, car);
         void *retval;
         CEthread_join(thread, &retval);
-        //end generar hilo, esta dormido ya que inicio con el mutex tomado
-        //se necesita un algoritmo descolador que le haga pop a la cola, y haga
-        //car ->unlock mutex.
-        encolar_con_algoritmo(car,0); //lo encola
 
+        encolar_con_algoritmo(car, queueLeft);
     }
+
     for (int j = 0; j < ambulancias; j++) {
-        //al carro hay que anadirle la textura sdl
         Car* car = malloc(sizeof(Car));
-        car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
-        CEmutex_init(car_mutex); //inicia el mutex
-        CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
-        //se va a ejecutar de una
-        car->mutex =car_mutex;
+        car_mutex = malloc(sizeof(CEmutex_t));
+        CEmutex_init(car_mutex);
+        CEmutex_lock(car_mutex);
+        car->mutex = car_mutex;
         car->id = id++;
         car->type = 2;
-        car->direction = 1; // 0: izquierda a derecha, 1: derecha a izquierda
+        car->direction = 1; // derecha a izquierda
         car->carTexture = carAmbulance;
-        //genera el hilo
+
         CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
+        thread.tid = CEthread_create(car_function, car);
         void *retval;
         CEthread_join(thread, &retval);
-        //end generar hilo, esta dormido ya que inicio con el mutex tomado
-        //se necesita un algoritmo descolador que le haga pop a la cola, y haga
-        //car ->unlock mutex.
-        encolar_con_algoritmo(car,1); //lo encola
 
+        encolar_con_algoritmo(car, queueRight);
     }
-    for (int j = 0; j < ambulancias ;j++) {
-        //al carro hay que anadirle la textura sdl
+
+    for (int j = 0; j < ambulancias; j++) {
         Car* car = malloc(sizeof(Car));
-        car_mutex= malloc(sizeof(CEmutex_t)); //crea el mutex
-        CEmutex_init(car_mutex); //inicia el mutex
-        CEmutex_lock(car_mutex); //bloquea el mutex , asi al crear el hilo no 
-        //se va a ejecutar de una
-        car->mutex =car_mutex;
+        car_mutex = malloc(sizeof(CEmutex_t));
+        CEmutex_init(car_mutex);
+        CEmutex_lock(car_mutex);
+        car->mutex = car_mutex;
         car->id = id++;
         car->type = 2;
-        car->direction = 0; // 0: izquierda a derecha, 1: derecha a izquierda
+        car->direction = 0; // izquierda a derecha
         car->carTexture = carAmbulance;
-        //genera el hilo
+
         CEthread_t thread;
-        int tid = CEthread_create(car_function, car);
-        thread.tid = tid;
+        thread.tid = CEthread_create(car_function, car);
         void *retval;
         CEthread_join(thread, &retval);
-        //end generar hilo, esta dormido ya que inicio con el mutex tomado
-        //se necesita un algoritmo descolador que le haga pop a la cola, y haga
-        //car ->unlock mutex.
-        encolar_con_algoritmo(car,0); //lo encola
 
+        encolar_con_algoritmo(car, queueLeft);
     }
-    //normales son 0, ambulancias son 2
-    //RECUERDE, DEBE DE HACERLE FREE(CAR), cuando el carro complete segun el algoritmo!!!
-    //aca tambien debo de crear los hilos, con su mutex muerto.
 }
+
+/*
 void initQueue(int tipoCalendarizador){
     seleccionar_algoritmo(tipoCalendarizador); //inicializa las colas, metodo de calendarizador
      
@@ -235,7 +202,7 @@ void initQueue(int tipoCalendarizador){
 }
 //dequeue
 
-/*
+
 //#define NUM_CARROS 
 
 void *car_function(void *arg) {

@@ -1,7 +1,7 @@
 #ifndef RoundRobin
 #define RoundRobin
-#include "Car.h"
-#include "ReadyQueue.h"
+#include "../../CEthreads/include/Car.h"
+#include "../ReadyQueue.h"
 typedef struct roundRobin{
     int Qos;
     Node *head;

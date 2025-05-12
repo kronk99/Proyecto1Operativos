@@ -1,61 +1,44 @@
 #include "Scheduler.h"
+#include "ReadyQueue.h"
 #include "algoritmos/prioridad.h"
 #include "algoritmos/SJF.h"
 
-
-//acomoda la ready q en base al calendarizador establecido
+// Variable para guardar el algoritmo seleccionado (mantener global o pasar también si quieres total desacoplamiento)
 Algoritmo algoritmo_actual = ALG_FCFS;
-ReadyQueue global_queue; //definicion global de la variable , Lista derecha
-ReadyQueue global_queueLeft; //definicion global de la variable , Lista izquierda.
 
-void seleccionar_algoritmo(int seleccion) {
+void seleccionar_algoritmo(int seleccion, ReadyQueue *rightQueue, ReadyQueue *leftQueue) {
     algoritmo_actual = (Algoritmo)seleccion;
-    init_queue(&global_queue); //inicializa la cola derecha
-    init_queue(&global_queueLeft); //inicializa la cola izquierda
+    init_queue(rightQueue);     // inicializa la cola derecha
+    init_queue(leftQueue);      // inicializa la cola izquierda
     /*
-    if (algoritmo_actual ==ALG_RR){
-        initRR(rrScheduler); //inicializa el puntero del round robin si se selecciono round robin
+    if (algoritmo_actual == ALG_RR) {
+        initRR(rrScheduler); // inicializa el puntero del round robin si se seleccionó round robin
     }*/
 }
-//hay que trabajar esto, hacerlo para una u otra cola dependiendo del parametro
-//1 si es derecha, 0 si es cola izquierda.
-void encolar_con_algoritmo(Car *car,int queue) {
+
+// Encola un carro en la cola que se le pasa como parámetro
+void encolar_con_algoritmo(Car *car, ReadyQueue *queue) {
     switch (algoritmo_actual) {
         case ALG_PRIORIDAD:
-            if(queue == 1){
-                enqueue_priority(&global_queue, car);
-            }
-            else{
-                enqueue_priority(&global_queueLeft, car);
-            }
+            enqueue_priority(queue, car);
             break;
         case ALG_SJF:
-            if(queue == 1){
-                enqueue_SJF(&global_queue, car);
-            }
-            else{
-                enqueue_SJF(&global_queueLeft, car);
-            }
-            enqueue_SJF(&global_queue, car);
+            enqueue_SJF(queue, car);
             break;
         case ALG_FCFS:
+            enqueue(queue, car); // Asumo que existe `enqueue` estándar para FCFS
             break;
         case ALG_RR:
+            // scheduleCar(rrScheduler, car);
+            // schedulereadyCar(queue, rrScheduler);
             break;
-            //aca debo de hacer una condicion adicional , por que si ya agrego los carros
-            //recuerde que debo dehacer re-schedule cada que cambio el quantum 
-            //scheduleCar(rrScheduler,car); //anade carro a la lista circular
-            //schedulereadyCar(&global_queue,rrScheduler);
-
-            break;
-
         default:
             // futura implementación
             break;
     }
 }
 
-Car* siguiente_carro() { //cambios para el RR, en vez de usar la cola del dequeue , voy a
-    //usar la cola de RR como cola de listo debido al quantum.
-    return dequeue(&global_queue);
+// Devuelve el siguiente carro según la cola que se le pase
+Car* siguiente_carro(ReadyQueue *queue) {
+    return dequeue(queue);
 }

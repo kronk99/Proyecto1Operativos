@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "Car.h"  
+#include "CEthreads/include/Car.h"  
 
 // Dimensiones ventana
 #define WINDOW_WIDTH 900
