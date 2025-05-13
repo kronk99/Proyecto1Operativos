@@ -6,9 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 #define STACK_SIZE (1024 * 1024) 
+
+ReadyQueue global_queue;
+ReadyQueue global_queueLeft;
+
 int main(int argc, char* argv[]) {
-    ReadyQueue global_queue;
-    ReadyQueue global_queueLeft;
 
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
@@ -32,7 +34,8 @@ int main(int argc, char* argv[]) {
     int largoCalle = 600;
 
     // Dibujar escena inicial
-    dibujarEscenario(renderer, carSport, carNormal, carEmergency, carros, cantidadCarros, largoCalle);
+    // Va a pintar los carros que estan esperando para pasar.
+    dibujarEscenario(renderer, &global_queue, &global_queueLeft, largoCalle);
     Timer tiempo;
     atomic_init(&tiempo.dirLetrero, 0);
     atomic_init(&tiempo.timeCount, 10);
@@ -46,8 +49,8 @@ int main(int argc, char* argv[]) {
         //crea el relog
     //llama al letrero
     //vamos a ver si funciona
-    letrero(&global_queue, &global_queueLeft, &tiempo);
-    //equity(2, &global_queue, &global_queueLeft, carSport, carNormal, carEmergency);
+    //letrero(&global_queue, &global_queueLeft, &tiempo);
+    equity(2, &global_queue, &global_queueLeft);
 
 
     cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);

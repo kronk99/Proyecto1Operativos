@@ -1,6 +1,7 @@
 #include "interfaz.h"
 #include <stdio.h>
 #include "Threads/Car.h"
+#include "Calendarizador/ReadyQueue.h"
 
 
 SDL_Renderer* globalRenderer = NULL;
@@ -44,7 +45,7 @@ SDL_Texture* cargarCarro(SDL_Renderer* renderer, const char* path) {
     return texture;
 }
 
-void dibujarEscenario(SDL_Renderer* renderer, SDL_Texture* carSport, SDL_Texture* carNormal, SDL_Texture* carEmergency, Car** carros, int cantidadCarros, int largoCalle) {
+void dibujarEscenario(SDL_Renderer* renderer, ReadyQueue* queueRight, ReadyQueue* queueLeft,int largoCalle) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
@@ -87,28 +88,36 @@ void dibujarEscenario(SDL_Renderer* renderer, SDL_Texture* carSport, SDL_Texture
     int contadorIzquierda = 0;  // cuántos carros van por el lado izquierdo
     int contadorDerecha = 0;    // cuántos carros van por el lado derecho
 
-    // Recorrer todos los carros
-    for (int i = 0; i < cantidadCarros; i++) {
-        SDL_Texture* textura = NULL; // textura del carro según su tipo
+        // Dibujar carros de la izquierda
+    queue_reset(queueLeft);
+    Car* car;
+    while ((car = queue_next(queueLeft)) != NULL) {
+        SDL_Texture* textura = NULL;
 
-        // Seleccionar la textura correcta según el tipo de carro
-        if (carros[i]->type == 1) textura = carSport;
-        else if (carros[i]->type == 0) textura = carNormal;
-        else if (carros[i]->type == 2) textura = carEmergency;
+        textura = car->carTexture;
 
-        SDL_Rect carRect;
-        if (carros[i]->direction == 0) { // si el carro viene por la izquierda
-            int posY = offsetY + contadorIzquierda * espaciadoVertical;
-            carRect = (SDL_Rect){10, posY, 40, 30}; // posición del carro a la izquierda
-            SDL_RenderCopyEx(renderer, textura, NULL, &carRect, 0, NULL, SDL_FLIP_HORIZONTAL); // voltear para que mire hacia la derecha
-            contadorIzquierda++; // aumentar contador de izquierda
-        } else { // si el carro viene por la derecha
-            int posY = offsetY + contadorDerecha * espaciadoVertical;
-            carRect = (SDL_Rect){bloqueVerdeDer.x + 10, posY, 40, 30}; // posición del carro a la derecha
-            SDL_RenderCopy(renderer, textura, NULL, &carRect); // no se voltsea
-            contadorDerecha++; // aumentar contador de derecha
-        }
+        int posY = offsetY + contadorIzquierda * espaciadoVertical;
+        SDL_Rect carRect = {10, posY, 40, 30}; // lado izquierdo
+
+        SDL_RenderCopyEx(renderer, textura, NULL, &carRect, 0, NULL, SDL_FLIP_HORIZONTAL);
+        contadorIzquierda++;
     }
+
+        // Dibujar carros de la derecha
+    queue_reset(queueRight);
+    while ((car = queue_next(queueRight)) != NULL) {
+        SDL_Texture* textura = NULL;
+        
+        textura = car->carTexture;
+
+        int posY = offsetY + contadorDerecha * espaciadoVertical;
+        SDL_Rect carRect = {bloqueVerdeDer.x + 10, posY, 40, 30}; // lado derecho
+
+        SDL_RenderCopy(renderer, textura, NULL, &carRect);
+        contadorDerecha++;
+    }
+
+
 
     SDL_RenderPresent(renderer);
 }

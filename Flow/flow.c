@@ -7,11 +7,13 @@
 #include "../Calendarizador/ReadyQueue.h"
 #include "../interfaz.h"
 #include "flow.h"
+#include "../globals.h"
 
 
 int current_direction = -1;  // -1: libre, 0: izquierda, 1: derecha
 
-void equity(int w, ReadyQueue* queueRight, ReadyQueue* queueLeft, SDL_Texture* carSport, SDL_Texture* carNormal, SDL_Texture* carEmergency) {
+
+void equity(int w, ReadyQueue* queueRight, ReadyQueue* queueLeft) {
     while (!is_empty(queueRight) || !is_empty(queueLeft)) {
         // Turno izquierda a derecha
         for (int i = 0; i < w && !is_empty(queueLeft); i++) {
@@ -90,7 +92,7 @@ void draw_car(int tipo, int direccion, SDL_Texture* imagen_carro) {
         SDL_RenderClear(globalRenderer);
 
         // Opcional: podés redibujar el fondo/escenario si querés mantenerlo
-        dibujarEscenario(globalRenderer, imagen_carro, imagen_carro, imagen_carro, NULL, 0, 600);
+        dibujarEscenario(globalRenderer, &global_queue, &global_queueLeft,  600);
 
         SDL_Rect carRect = {x, y, w, h};
         if (direccion == 0)
