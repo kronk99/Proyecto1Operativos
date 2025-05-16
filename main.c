@@ -61,6 +61,8 @@ int main(int argc, char* argv[]) {
         hilo.arg = &tiempo;
         hilo.stack_size = STACK_SIZE;
         hilo.is_finished = 0;
+
+        CEthread_create(&hilo);
         printf("Tipo de flujo seleccionado es letrero\n");
         letrero(&global_queue, &global_queueLeft, &tiempo);
         

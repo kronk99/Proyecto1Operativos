@@ -111,7 +111,7 @@ void draw_car(int tipo, int direccion, SDL_Texture* imagen_carro) {
 // ======================= LETRERO =========================
 
 int contador(void *arg){
-    printf("--------------------ENTRA EN CONTADOR--------------------");
+    printf("--------------------ENTRA EN CONTADOR--------------------\n");
     Timer *tiempo = (Timer *)arg;
     int value=1;
     while (value){
@@ -119,7 +119,7 @@ int contador(void *arg){
             //y hace sleep
         sleep(1); //mete un sleep para simular el conteo
         if(tiempo->timeCount ==0){
-            printf("cambio de direccion de letrero ");
+            printf("----------------Cambio de direccion de letrero----------------\n ");
             atomic_fetch_xor(&(tiempo->dirLetrero), 1); //si es 1 lo pone en 0 y viceversa
             // timeCount = 10
             atomic_store(&(tiempo->timeCount), tiempo->time_Value);  // resetea el contador
