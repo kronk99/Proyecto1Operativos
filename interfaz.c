@@ -36,7 +36,6 @@ void dibujarFlechaDireccion(SDL_Renderer* renderer, SDL_Texture* flechaIzq, SDL_
     SDL_Rect dst = {WINDOW_WIDTH / 2 - 25, 10, 50, 50};  // centro superior
     if (direccion == 0) {
         SDL_RenderCopyEx(renderer, flechaDer, NULL, &dst, 0, NULL, SDL_FLIP_NONE);
-        sleep(5);
     } else {
         SDL_RenderCopyEx(renderer, flechaIzq, NULL, &dst, 0, NULL, SDL_FLIP_NONE);
     }
