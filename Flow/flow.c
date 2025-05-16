@@ -159,6 +159,42 @@ void letrero(ReadyQueue* queueRight, ReadyQueue* queueLeft, Timer *tiempo){
     }
     fprintf(stderr, "Todos los carros han cruzado.\n");
 }
+void fifo(int w, ReadyQueue* queueRight, ReadyQueue* queueLeft) {
+    while (!is_empty(queueRight) || !is_empty(queueLeft)) {
+        Car* leftCar = peek_car(queueLeft);   // Ver primer carro en la cola izquierda
+        Car* rightCar = peek_car(queueRight); // Ver primer carro en la cola derecha
+
+        Car* nextCar = NULL;
+        int fromLeft = 0;
+
+        if (leftCar && rightCar) {
+            if (leftCar->id < rightCar->id) {
+                nextCar = siguiente_carro(queueLeft); // Remueve de la cola
+                fromLeft = 1;
+            } else {
+                nextCar = siguiente_carro(queueRight); // Remueve de la cola
+                fromLeft = 0;
+            }
+        } else if (leftCar) {
+            nextCar = siguiente_carro(queueLeft);
+            fromLeft = 1;
+        } else if (rightCar) {
+            nextCar = siguiente_carro(queueRight);
+            fromLeft = 0;
+        }
+
+        if (nextCar) {
+            printf("Equity desbloqueando carro #%d (%s)\n", nextCar->id, fromLeft ? "izquierda a derecha" : "derecha a izquierda");
+            CEmutex_unlock(nextCar->mutex);
+
+            while (atomic_load(&nextCar->hasArrived) == 0) {
+                sleep(1); // Esperar a que cruce antes de desbloquear el siguiente
+            }
+        }
+    }
+
+    fprintf(stderr, "Todos los carros han cruzado.\n");
+}
 /*
 void fifo(struct CarList* left, struct CarList* right) {
 while (left->count > 0 || right->count > 0) {

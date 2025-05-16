@@ -80,10 +80,11 @@ int main(int argc, char* argv[]) {
     }
     //Tipo de flujo seleccionado FIFO
     else{
-        printf("Tipo de flujo seleccionado FIFO\n");
+        dibujarEscenario(renderer, &global_queue, &global_queueLeft, config.largo_calle);
+        printf("Tipo de flujo seleccionado es fifo\n");
+        fifo(0, &global_queue, &global_queueLeft);
 
     }
-
 
     cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);
     return 0;
