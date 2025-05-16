@@ -3,6 +3,7 @@
 #include "Flow/flow.h"
 #include "Calendarizador/Scheduler.h"
 #include "Calendarizador/ReadyQueue.h"
+#include "Lectura/read.h"
 #include <stdio.h>
 #include <string.h>
 #define STACK_SIZE (1024 * 1024) 

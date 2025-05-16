@@ -19,6 +19,7 @@ SRCS = main.c \
 	Threads/CEthread_end.c \
 	Threads/CEthread_join.c \
 	Flow/flow.c \
+	Lectura/read.c \
 	Testing.c \
 	interfaz.c
 
