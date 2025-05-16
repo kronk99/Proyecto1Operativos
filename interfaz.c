@@ -31,6 +31,17 @@ int iniciarInterfaz(SDL_Window** window, SDL_Renderer** renderer) {
 
     return 1;
 }
+
+void dibujarFlechaDireccion(SDL_Renderer* renderer, SDL_Texture* flechaIzq, SDL_Texture* flechaDer, int direccion) {
+    SDL_Rect dst = {WINDOW_WIDTH / 2 - 25, 10, 50, 50};  // centro superior
+    if (direccion == 0) {
+        SDL_RenderCopyEx(renderer, flechaDer, NULL, &dst, 0, NULL, SDL_FLIP_NONE);
+        sleep(5);
+    } else {
+        SDL_RenderCopyEx(renderer, flechaIzq, NULL, &dst, 0, NULL, SDL_FLIP_NONE);
+    }
+}
+
 //ESTO PINTA EL CARRO EN UNAS COORDNEADAS ESPECIFICADAS
 SDL_Texture* cargarCarro(SDL_Renderer* renderer, const char* path) {
     SDL_Surface* surface = IMG_Load(path);

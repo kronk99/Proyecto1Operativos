@@ -6,10 +6,15 @@
 #include "Lectura/read.h"
 #include <stdio.h>
 #include <string.h>
+#include "globals.h"
 #define STACK_SIZE (1024 * 1024) 
 
 ReadyQueue global_queue;
 ReadyQueue global_queueLeft;
+
+SDL_Texture* sentidoIzquierda = NULL;
+SDL_Texture* sentidoDerecha = NULL;
+
 
 int main(int argc, char* argv[]) {
 
@@ -25,6 +30,9 @@ int main(int argc, char* argv[]) {
     SDL_Texture* carSport = cargarCarro(renderer, "images/sport.png");
     SDL_Texture* carNormal = cargarCarro(renderer, "images/normal.png");
     SDL_Texture* carEmergency = cargarCarro(renderer, "images/emergency.png");
+    sentidoIzquierda = cargarCarro(renderer, "images/izquierda.png");
+    sentidoDerecha = cargarCarro(renderer, "images/derecha.png");
+
     if (!carSport || !carNormal || !carEmergency) {
         cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);
         return 1;
@@ -35,7 +43,7 @@ int main(int argc, char* argv[]) {
 
     // Dibujar escena inicial
     // Va a pintar los carros que estan esperando para pasar.
-    dibujarEscenario(renderer, &global_queue, &global_queueLeft, config.largo_calle);
+    
 
         //crea el relog
     //llama al letrero
@@ -46,6 +54,7 @@ int main(int argc, char* argv[]) {
     //Tipo de flujo seleccionado es equidad
     if(config.tipo_flujo == 0){
         printf("Tipo de flujo seleccionado es equidad\n");
+        dibujarEscenario(renderer, &global_queue, &global_queueLeft, config.largo_calle);
         equity(config.w, &global_queue, &global_queueLeft);
     }
     //Tipo de flujo seleccionado es letrero
@@ -64,6 +73,7 @@ int main(int argc, char* argv[]) {
 
         CEthread_create(&hilo);
         printf("Tipo de flujo seleccionado es letrero\n");
+        dibujarEscenario(renderer, &global_queue, &global_queueLeft, config.largo_calle);
         letrero(&global_queue, &global_queueLeft, &tiempo);
         
 

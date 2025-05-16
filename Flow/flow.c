@@ -90,8 +90,6 @@ void draw_car(int tipo, int direccion, SDL_Texture* imagen_carro) {
     for (int x = startX; (direccion == 0 ? x < endX : x > endX); x += step) {
         SDL_SetRenderDrawColor(globalRenderer, 0, 0, 0, 255);
         SDL_RenderClear(globalRenderer);
-
-        // Opcional: podés redibujar el fondo/escenario si querés mantenerlo
         dibujarEscenario(globalRenderer, &global_queue, &global_queueLeft,  600);
 
         SDL_Rect carRect = {x, y, w, h};
@@ -121,6 +119,7 @@ int contador(void *arg){
         if(tiempo->timeCount ==0){
             printf("----------------Cambio de direccion de letrero----------------\n ");
             atomic_fetch_xor(&(tiempo->dirLetrero), 1); //si es 1 lo pone en 0 y viceversa
+            dibujarFlechaDireccion(globalRenderer, sentidoIzquierda, sentidoDerecha, tiempo->dirLetrero);
             // timeCount = 10
             atomic_store(&(tiempo->timeCount), tiempo->time_Value);  // resetea el contador
         }
