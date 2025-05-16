@@ -3,7 +3,7 @@
 #include <string.h>
 #include "read.h"
 
-void leer_configuracion(const char *filename, TrafficConfig *config) {
+void read(const char *filename, TrafficConfig *config) {
     FILE *file = fopen(filename, "r");
     if (!file) {
         perror("No se pudo abrir el archivo");

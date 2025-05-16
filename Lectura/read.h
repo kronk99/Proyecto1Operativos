@@ -12,6 +12,6 @@ typedef struct {
     int carros_emergencia;
 } TrafficConfig;
 
-void leer_configuracion(const char *filename, TrafficConfig *config);
+void read(const char *filename, TrafficConfig *config);
 
 #endif

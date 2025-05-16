@@ -13,6 +13,10 @@ ReadyQueue global_queueLeft;
 
 int main(int argc, char* argv[]) {
 
+    TrafficConfig config;
+
+    read("configuracion.txt", &config);
+
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
 
@@ -26,8 +30,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    seleccionar_algoritmo(1, &global_queue, &global_queueLeft);
-    createCars(2, 2, 0, carSport, carEmergency, carNormal, &global_queue, &global_queueLeft);
+    seleccionar_algoritmo(config.tipo_calendarizador, &global_queue, &global_queueLeft);
+    createCars(config.carros_deportivos, config.carros_emergencia, config.carros_normales, carSport, carEmergency, carNormal, &global_queue, &global_queueLeft);
+
 
     // Suponemos que tenés un array de carros, por ahora NULL para evitar error
     Car* carros[10] = {0};  // o el arreglo que uses
