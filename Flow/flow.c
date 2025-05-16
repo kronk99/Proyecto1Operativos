@@ -111,6 +111,7 @@ void draw_car(int tipo, int direccion, SDL_Texture* imagen_carro) {
 // ======================= LETRERO =========================
 
 int contador(void *arg){
+    printf("--------------------ENTRA EN CONTADOR--------------------");
     Timer *tiempo = (Timer *)arg;
     int value=1;
     while (value){
@@ -131,7 +132,7 @@ void letrero(ReadyQueue* queueRight, ReadyQueue* queueLeft, Timer *tiempo){
     while (!is_empty(queueRight) || !is_empty(queueLeft)) {// Turno izquierda a derecha
         if(atomic_load(&(tiempo->dirLetrero))==0 && !is_empty(queueLeft)) {
             Car* car = siguiente_carro(queueLeft);
-            printf("Equity desbloqueando carro #%d (izquierda a derecha)\n", car->id);
+            printf("Letrero desbloqueando carro #%d (izquierda a derecha)\n", car->id);
             CEmutex_unlock(car->mutex);
 
             //draw_car(car->type, car->direction, carSport, carNormal, carEmergency);
@@ -144,7 +145,7 @@ void letrero(ReadyQueue* queueRight, ReadyQueue* queueLeft, Timer *tiempo){
         }
         else if(atomic_load(&(tiempo->dirLetrero))==1 && !is_empty(queueRight)){
             Car* car = siguiente_carro(queueRight);
-            printf("Equity desbloqueando carro #%d (izquierda a derecha)\n", car->id);
+            printf("Letrero desbloqueando carro #%d (izquierda a derecha)\n", car->id);
             CEmutex_unlock(car->mutex);
 
             //draw_car(car->type, car->direction, carSport, carNormal, carEmergency);

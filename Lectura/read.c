@@ -3,7 +3,7 @@
 #include <string.h>
 #include "read.h"
 
-void read(const char *filename, TrafficConfig *config) {
+void readConfiguration(const char *filename, TrafficConfig *config) {
     FILE *file = fopen(filename, "r");
     if (!file) {
         perror("No se pudo abrir el archivo");
@@ -21,8 +21,8 @@ void read(const char *filename, TrafficConfig *config) {
             sscanf(linea, "Tipo de flujo: %d", &config->tipo_flujo);
         else if (strstr(linea, "Tiempo del letrero:") != NULL)
             sscanf(linea, "Tiempo del letrero: %d", &config->tiempo_letrero);
-        else if (strstr(linea, "Cantidad de letrero:") != NULL)
-            sscanf(linea, "Cantidad de letrero: %d", &config->cantidad_letreros);
+        else if (strstr(linea, "W:") != NULL)
+            sscanf(linea, "W: %d", &config->w);
         else if (strstr(linea, "Cantidad inicial carros deportivos:") != NULL)
             sscanf(linea, "Cantidad inicial carros deportivos: %d", &config->carros_deportivos);
         else if (strstr(linea, "Cantidad inicial carros normales:") != NULL)

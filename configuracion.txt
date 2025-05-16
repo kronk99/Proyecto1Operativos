@@ -2,7 +2,7 @@ Largo de la calle: 100
 Tipo de calendarizador: 1
 Tipo de flujo: 1
 Tiempo del letrero: 2
-Cantidad de letrero: 2
+W: 2
 Cantidad inicial carros deportivos: 2
 Cantidad inicial carros normales: 3
 Cantidad inicial carros emergencia: 0

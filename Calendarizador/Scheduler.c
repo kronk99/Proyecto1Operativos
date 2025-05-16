@@ -20,9 +20,11 @@ void seleccionar_algoritmo(int seleccion, ReadyQueue *rightQueue, ReadyQueue *le
 void encolar_con_algoritmo(Car *car, ReadyQueue *queue) {
     switch (algoritmo_actual) {
         case ALG_PRIORIDAD:
+            printf("Se seleccionó Prioridad\n");
             enqueue_priority(queue, car);
             break;
         case ALG_SJF:
+            printf("Se seleccionó SJF\n");
             enqueue_SJF(queue, car);
             break;
         case ALG_FCFS:

@@ -6,12 +6,12 @@ typedef struct {
     int tipo_calendarizador;
     int tipo_flujo;
     int tiempo_letrero;
-    int cantidad_letreros;
+    int w;
     int carros_deportivos;
     int carros_normales;
     int carros_emergencia;
 } TrafficConfig;
 
-void read(const char *filename, TrafficConfig *config);
+void readConfiguration(const char *filename, TrafficConfig *config);
 
 #endif

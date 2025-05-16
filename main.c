@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 
     TrafficConfig config;
 
-    read("configuracion.txt", &config);
+    readConfiguration("configuracion.txt", &config);
 
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
@@ -33,30 +33,44 @@ int main(int argc, char* argv[]) {
     seleccionar_algoritmo(config.tipo_calendarizador, &global_queue, &global_queueLeft);
     createCars(config.carros_deportivos, config.carros_emergencia, config.carros_normales, carSport, carEmergency, carNormal, &global_queue, &global_queueLeft);
 
-
-    // Suponemos que tenés un array de carros, por ahora NULL para evitar error
-    Car* carros[10] = {0};  // o el arreglo que uses
-    int cantidadCarros = 0; // o el número real de carros creados
-    int largoCalle = 600;
-
     // Dibujar escena inicial
     // Va a pintar los carros que estan esperando para pasar.
-    dibujarEscenario(renderer, &global_queue, &global_queueLeft, largoCalle);
-    Timer tiempo;
-    atomic_init(&tiempo.dirLetrero, 0);
-    atomic_init(&tiempo.timeCount, 10);
-    tiempo.time_Value = 10;
+    dibujarEscenario(renderer, &global_queue, &global_queueLeft, config.largo_calle);
 
-    CEthreads_t hilo;
-    hilo.start_routine = contador;
-    hilo.arg = &tiempo;
-    hilo.stack_size = STACK_SIZE;
-    hilo.is_finished = 0;
         //crea el relog
     //llama al letrero
     //vamos a ver si funciona
     //letrero(&global_queue, &global_queueLeft, &tiempo);
-    equity(2, &global_queue, &global_queueLeft);
+    //
+
+    //Tipo de flujo seleccionado es equidad
+    if(config.tipo_flujo == 0){
+        printf("Tipo de flujo seleccionado es equidad\n");
+        equity(config.w, &global_queue, &global_queueLeft);
+    }
+    //Tipo de flujo seleccionado es letrero
+    else if (config.tipo_flujo == 1)
+    {
+        Timer tiempo;
+        atomic_init(&tiempo.dirLetrero, 0);
+        atomic_init(&tiempo.timeCount, config.tiempo_letrero);
+        tiempo.time_Value = config.tiempo_letrero;
+
+        CEthreads_t hilo;
+        hilo.start_routine = contador;
+        hilo.arg = &tiempo;
+        hilo.stack_size = STACK_SIZE;
+        hilo.is_finished = 0;
+        printf("Tipo de flujo seleccionado es letrero\n");
+        letrero(&global_queue, &global_queueLeft, &tiempo);
+        
+
+    }
+    //Tipo de flujo seleccionado FIFO
+    else{
+        printf("Tipo de flujo seleccionado FIFO\n");
+
+    }
 
 
     cerrarInterfaz(window, renderer, carSport, carNormal, carEmergency);
